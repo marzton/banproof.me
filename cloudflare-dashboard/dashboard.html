@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banproof.me - Infrastructure Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="glass-panel sidebar">
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <h2>banproof.me</h2>
+            </div>
+            <nav class="main-nav">
+                <a href="#" class="nav-item active">
+                    <span class="icon">📊</span> Overview
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🛰️</span> DePIN Nodes
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">🛑</span> Toll Booth Logs
+                </a>
+                <a href="index.html" class="nav-item">
+                    <span class="icon">⬅️</span> Back to Registry
+                </a>
+            </nav>
+            <div class="system-status">
+                <div class="status-indicator live"></div>
+                <span>WAF Active (Cloudflare)</span>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Area -->
+        <main class="dashboard-content">
+            <header class="top-bar glass-panel">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search logs, IPs, or node hashes..." />
+                </div>
+                <div class="profile-menu">
+                    <div class="avatar">JW</div>
+                    <span>Corporate Architect</span>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- KPI Cards -->
+                <div class="glass-panel kpi-card">
+                    <h3>Active Residential Nodes</h3>
+                    <div class="kpi-value">1,402 <span class="trend pos">↑ 12%</span></div>
+                    <p class="kpi-subtext">Providing Proof of Agency</p>
+                </div>
+                <div class="glass-panel kpi-card">
+                    <h3>Signals Processed (24h)</h3>
+                    <div class="kpi-value">845k <span class="trend pos">↑ 5%</span></div>
+                    <p class="kpi-subtext">Across 3 active projects</p>
+                </div>
+                <div class="glass-panel kpi-card">
+                    <h3>Toll Revenue Rejected</h3>
+                    <div class="kpi-value highlight">$4,290 <span class="trend neg">↓ Risk</span></div>
+                    <p class="kpi-subtext">Prevented unauthorized crawls</p>
+                </div>
+
+                <!-- Main Activity Chart -->
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h3>Node verification flow</h3>
+                        <div class="actions">
+                            <button class="btn btn-primary">Live Stream</button>
+                        </div>
+                    </div>
+                    <div class="chart-placeholder placeholder-glow" id="activity-chart">
+                        <!-- Chart visualization will mount here -->
+                        <div class="mock-bars">
+                            <div class="bar" style="height: 40%"></div>
+                            <div class="bar" style="height: 60%"></div>
+                            <div class="bar" style="height: 80%"></div>
+                            <div class="bar" style="height: 30%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 50%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Feed -->
+                <div class="glass-panel logs-panel">
+                    <h3>Recent Toll Booth Activity</h3>
+                    <ul class="log-list" id="recent-logs">
+                        <li class="log-item">
+                            <span class="log-time">10:42 AM</span>
+                            <span class="log-ip">100.200.200.2 (DePIN)</span>
+                            <span class="badge success">Verified</span>
+                            <span class="log-msg">Gold Shore DRS trigger executed</span>
+                        </li>
+                        <li class="log-item">
+                            <span class="log-time">10:41 AM</span>
+                            <span class="log-ip">45.21.XX.XX (Datacenter)</span>
+                            <span class="badge danger">Rejected</span>
+                            <span class="log-msg">Failed Proof of Agency (Bot)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
