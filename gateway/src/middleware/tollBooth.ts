@@ -1,7 +1,7 @@
 import { MiddlewareHandler } from 'hono';
 import { validateProofOfAgency } from '../validators/proofOfAgency.js';
 
-export const tollBoothMiddleware: MiddlewareHandler = async (c, next) => {
+export const tollBoothMiddleware: MiddlewareHandler = async (c: any, next: any) => {
   console.log(`[Toll Booth] Intercepted ${c.req.method} request to ${c.req.url}`);
   
   const authHeader = c.req.header('Authorization');
