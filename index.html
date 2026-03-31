@@ -574,6 +574,32 @@
       border: 1px solid var(--border);
     }
 
+    .cf-panel {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 1.4rem;
+    }
+
+    .cf-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .cf-item {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.72rem;
+    }
+
+    .cf-label { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .cf-value { color: #fff; }
+
     .price-card {
       padding: 2.5rem 2rem;
       border-right: 1px solid var(--border);
@@ -729,6 +755,7 @@
       .pricing-grid { grid-template-columns: 1fr; }
       .node-grid { grid-template-columns: 1fr; }
       .cta-inner { grid-template-columns: 1fr; }
+      .cf-grid { grid-template-columns: 1fr; }
       nav { padding: 0 1.5rem; }
       .nav-links { display: none; }
       .container { padding: 0 1.5rem; }
@@ -747,7 +774,7 @@
     <li><a href="#how">How it works</a></li>
     <li><a href="#nodes">Node network</a></li>
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="#docs">Docs</a></li>
+    <li><a href="#cloudflare-status">Cloudflare status</a></li>
   </ul>
   <a href="#pricing" class="nav-cta">Get access</a>
 </nav>
@@ -959,6 +986,28 @@
   </div>
 </section>
 
+<!-- DOCS / CLOUDFLARE -->
+<div id="docs"></div>
+<section id="cloudflare-status">
+  <div class="container">
+    <p class="section-tag">// Cloudflare status</p>
+    <h2>Cloudflare edge<br><span class="acc">integration status.</span></h2>
+    <div class="cf-panel reveal">
+      <p style="font-size:0.8rem; color:var(--muted);">
+        This public site verifies Cloudflare edge connectivity in real time using the Cloudflare speed test metadata endpoint.
+      </p>
+      <div class="cf-grid">
+        <div class="cf-item"><span class="cf-label">Zone</span><span id="cf-zone" class="cf-value">Checking…</span></div>
+        <div class="cf-item"><span class="cf-label">Provider</span><span class="cf-value">Cloudflare</span></div>
+        <div class="cf-item"><span class="cf-label">Edge colo</span><span id="cf-colo" class="cf-value">Checking…</span></div>
+        <div class="cf-item"><span class="cf-label">Region</span><span id="cf-region" class="cf-value">Checking…</span></div>
+        <div class="cf-item"><span class="cf-label">ASN</span><span id="cf-asn" class="cf-value">Checking…</span></div>
+        <div class="cf-item"><span class="cf-label">Status</span><span id="cf-status" class="cf-value" style="color:var(--amber)">Connecting…</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PRICING -->
 <section id="pricing">
   <div class="container">
@@ -1065,6 +1114,37 @@
       line.style.opacity = '1';
     }, 800 + i * 200);
   });
+
+  // Cloudflare edge metadata integration
+  async function loadCloudflareMeta() {
+    const statusEl = document.getElementById('cf-status');
+    document.getElementById('cf-zone').textContent = window.location.hostname || 'Unknown';
+    try {
+      const response = await fetch('https://speed.cloudflare.com/meta');
+      if (!response.ok) throw new Error(`Cloudflare metadata HTTP ${response.status}`);
+      const meta = await response.json();
+      document.getElementById('cf-colo').textContent = meta.colo || 'Unknown';
+      const city = typeof meta.city === 'string' ? meta.city.trim() : '';
+      const country = typeof meta.country === 'string' ? meta.country.trim() : '';
+      let region = 'Unknown';
+      if (city && country) {
+        region = `${city}, ${country}`;
+      } else if (city || country) {
+        region = city || country;
+      }
+      document.getElementById('cf-region').textContent = region;
+      document.getElementById('cf-asn').textContent = meta.asn || 'Unknown';
+      statusEl.textContent = 'Connected';
+      statusEl.style.color = 'var(--green)';
+      statusEl.title = 'Successfully connected to Cloudflare edge';
+    } catch (error) {
+      statusEl.textContent = 'Unavailable';
+      statusEl.style.color = 'var(--red)';
+      statusEl.title = 'Cloudflare metadata unavailable';
+    }
+  }
+
+  loadCloudflareMeta();
 </script>
 </body>
 </html>
