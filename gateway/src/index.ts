@@ -1,32 +1,32 @@
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
-import { tollBoothMiddleware } from './middleware/tollBooth.js';
+import { cors } from 'hono/cors';
+import { BanproofEngine } from './engine';
 
-const app = new Hono();
+type Bindings = {
+  DB: D1Database;
+  CACHE: KVNamespace;
+  ENGINE: WorkflowBinding;
+};
 
-// Testing public route vs private route
-app.get('/public/milestones', (c: any) => {
-  return c.json({ message: 'Public milestones data', status: 'unrestricted' });
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.use('*', cors({ origin: 'http://localhost:5500', credentials: true }));
+
+// Health Check - Verifies D1 is actually connected
+app.get('/api/health', async (c) => {
+  const dbCheck = await c.env.DB.prepare('SELECT 1').first();
+  return c.json({ status: 'ok', database: !!dbCheck, workflow: !!c.env.ENGINE });
 });
 
-// Protect all /api/ endpoints with the Toll Booth
-app.use('/api/*', tollBoothMiddleware);
-
-app.post('/api/verify', async (c: any) => {
+// Trigger the AI Signal Workflow (Pro Only)
+app.post('/api/pro/analyze', async (c) => {
   const body = await c.req.json();
-  return c.json({ message: 'Payload verified and logged', data: body });
-});
-
-app.get('/api/data/goldshore', (c: any) => {
-  return c.json({ 
-    message: 'Gold Shore logic execution success',
-    data: { drsScore: 85, recommendation: 'Approve' } 
+  // Trigger the durable workflow engine
+  const instance = await c.env.ENGINE.create({
+    params: { query: body.query, userId: 'test-user-001' }
   });
+  return c.json({ success: true, workflowId: instance.id });
 });
 
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info: any) => {
-  console.log(`Toll Booth Gateway running at http://localhost:${info.port}`);
-});
+export { BanproofEngine };
+export default app;
