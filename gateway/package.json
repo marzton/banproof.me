@@ -1,25 +1,24 @@
 {
   "name": "banproof-gateway",
   "version": "1.0.0",
-  "description": "Toll Booth API Gateway for banproof.me",
+  "description": "Banproof Core Gateway — Cloudflare Worker with D1, KV, Workflows, and AI",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "test": "vitest run",
+    "dev":    "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test":   "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
-    "hono": "^4.6.14",
-    "zod": "^3.24.1"
+    "hono": "^4.6.14"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260401.1",
     "@types/node": "^22.10.2",
     "@vitest/coverage-v8": "^4.1.2",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "wrangler": "^4.0.0"
   }
 }

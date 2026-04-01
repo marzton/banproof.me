@@ -1,42 +1,67 @@
-import { serve } from '@hono/node-server';
+// ============================================================
+// banproof-core — Gatekeeper Worker (Cloudflare Workers)
+// ============================================================
+
 import { Hono } from 'hono';
-import { tollBoothMiddleware } from './middleware/tollBooth.js';
+import { cors } from 'hono/cors';
+import type { Workflow } from '@cloudflare/workers-types';
+import { BanproofEngine } from './engine.js';
 
-const app = new Hono();
+// ── Bindings type ─────────────────────────────────────────────
+type Bindings = {
+  DB:     D1Database;
+  CACHE:  KVNamespace;
+  ENGINE: Workflow;
+};
 
-// Testing public route vs private route
-app.get('/public/milestones', (c) => {
-  return c.json({ message: 'Public milestones data', status: 'unrestricted' });
+const app = new Hono<{ Bindings: Bindings }>();
+
+// ── CORS middleware ───────────────────────────────────────────
+app.use(
+  '/api/*',
+  cors({
+    origin: ['https://banproof.me', 'http://localhost:5500'],
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }),
+);
+
+// ── GET /api/health ───────────────────────────────────────────
+// Verifies D1 connectivity and that the Workflow binding exists.
+app.get('/api/health', async (c) => {
+  let database = false;
+  try {
+    await c.env.DB.prepare('SELECT 1').first();
+    database = true;
+  } catch {
+    // D1 not reachable
+  }
+
+  const workflow = typeof c.env.ENGINE?.create === 'function';
+
+  return c.json({ status: 'ok', database, workflow });
 });
 
-// Protect all /api/ endpoints with the Toll Booth
-app.use('/api/*', tollBoothMiddleware);
+// ── POST /api/pro/analyze ─────────────────────────────────────
+// Triggers a BanproofEngine workflow instance.
+app.post('/api/pro/analyze', async (c) => {
+  const { query, userId } = await c.req.json<{
+    query: string;
+    userId: string;
+  }>();
 
-app.post('/api/verify', async (c) => {
-  const body = await c.req.json();
-  return c.json({ message: 'Payload verified and logged', data: body });
-});
+  if (!query || !userId) {
+    return c.json({ error: 'query and userId are required.' }, 400);
+  }
 
-app.get('/api/data/goldshore', (c) => {
-  return c.json({ 
-    message: 'Gold Shore logic execution success',
-    data: { drsScore: 85, recommendation: 'Approve' } 
+  const instance = await c.env.ENGINE.create({
+    params: { query, userId },
   });
+
+  return c.json({ workflowId: instance.id }, 202);
 });
 
-app.get('/api/status', (c) => {
-  // This route is protected by the tollBoothMiddleware.
-  // We can access the poaScore that was set in the middleware.
-  const poaScore = c.get('poaScore');
-  return c.json({
-    message: 'Gateway status: Operational',
-    poaScore: poaScore ?? 'N/A',
-  });
-});
-
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info) => {
-  console.log(`Toll Booth Gateway running at http://localhost:${info.port}`);
-});
+// ── Exports ───────────────────────────────────────────────────
+export { BanproofEngine };
+export default app;
