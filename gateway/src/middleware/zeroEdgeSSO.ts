@@ -105,12 +105,15 @@ export async function validateZeroEdgeJWT(
   }
 
   // Validate audience
-  // Note: when audience is empty (e.g. ENVIRONMENT=development), this check is skipped
-  // intentionally — use a real audience in production (CF_ACCESS_AUDIENCE env var).
+  // A missing/empty audience configuration is treated as an error to avoid
+  // accidentally accepting tokens with any aud value.
+  if (!audience || !audience.trim()) {
+    throw new Error('Invalid JWT: missing audience configuration');
+  }
   const audList = Array.isArray(payload.aud)
     ? payload.aud
     : payload.aud != null ? [payload.aud] : [];
-  if (audience && (!audList.length || !audList.includes(audience))) {
+  if (!audList.length || !audList.includes(audience)) {
     throw new Error('Invalid JWT: audience mismatch');
   }
 
