@@ -1,32 +1,67 @@
+// ============================================================
+// banproof-core — Gatekeeper Worker (Cloudflare Workers)
+// ============================================================
+
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { BanproofEngine } from './engine';
+import type { Workflow } from '@cloudflare/workers-types';
+import { BanproofEngine } from './engine.js';
 
+// ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
-  DB: D1Database;
-  CACHE: KVNamespace;
-  ENGINE: WorkflowBinding;
+  DB:     D1Database;
+  CACHE:  KVNamespace;
+  ENGINE: Workflow;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use('*', cors({ origin: 'http://localhost:5500', credentials: true }));
+// ── CORS middleware ───────────────────────────────────────────
+app.use(
+  '/api/*',
+  cors({
+    origin: ['https://banproof.me', 'http://localhost:5500'],
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }),
+);
 
-// Health Check - Verifies D1 is actually connected
+// ── GET /api/health ───────────────────────────────────────────
+// Verifies D1 connectivity and that the Workflow binding exists.
 app.get('/api/health', async (c) => {
-  const dbCheck = await c.env.DB.prepare('SELECT 1').first();
-  return c.json({ status: 'ok', database: !!dbCheck, workflow: !!c.env.ENGINE });
+  let database = false;
+  try {
+    await c.env.DB.prepare('SELECT 1').first();
+    database = true;
+  } catch {
+    // D1 not reachable
+  }
+
+  const workflow = typeof c.env.ENGINE?.create === 'function';
+
+  return c.json({ status: 'ok', database, workflow });
 });
 
-// Trigger the AI Signal Workflow (Pro Only)
+// ── POST /api/pro/analyze ─────────────────────────────────────
+// Triggers a BanproofEngine workflow instance.
 app.post('/api/pro/analyze', async (c) => {
-  const body = await c.req.json();
-  // Trigger the durable workflow engine
+  const { query, userId } = await c.req.json<{
+    query: string;
+    userId: string;
+  }>();
+
+  if (!query || !userId) {
+    return c.json({ error: 'query and userId are required.' }, 400);
+  }
+
   const instance = await c.env.ENGINE.create({
-    params: { query: body.query, userId: 'test-user-001' }
+    params: { query, userId },
   });
-  return c.json({ success: true, workflowId: instance.id });
+
+  return c.json({ workflowId: instance.id }, 202);
 });
 
+// ── Exports ───────────────────────────────────────────────────
 export { BanproofEngine };
 export default app;
