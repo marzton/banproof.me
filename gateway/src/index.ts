@@ -81,16 +81,17 @@ app.post('/api/pro/analyze', authMiddleware, async (c) => {
     userId: string;
   }>();
 
-  if (!query || !userId) {
-    return c.json({ error: 'query and userId are required.' }, 400);
-  }
+    if (!query || !userId) {
+      return c.json({ error: 'query and userId are required.' }, 400);
+    }
 
-  const instance = await c.env.ENGINE.create({
-    params: { query, userId },
-  });
+    const instance = await c.env.ENGINE.create({
+      params: { query, userId, useMock: c.env.USE_MOCK === 'true' },
+    });
 
-  return c.json({ workflowId: instance.id }, 202);
-});
+    return c.json({ workflowId: instance.id }, 202);
+  },
+);
 
 // ── Fallback ──────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'Route not found.' }, 404));

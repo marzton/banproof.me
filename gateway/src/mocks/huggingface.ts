@@ -1,26 +1,23 @@
 // ============================================================
-// Mock HuggingFace Sentiment — randomised BULLISH / BEARISH
+// Mock Hugging Face SportsBERT sentiment analyzer
+// Returns randomized BULLISH/BEARISH scores for sandbox testing
 // ============================================================
 
 import type { SentimentResult } from '../types/api.js';
 
-const LABELS = ['BULLISH', 'BEARISH', 'NEUTRAL'] as const;
-
 export function mockSentiment(): SentimentResult {
-  const roll = Math.random();
+  const isBullish = Math.random() > 0.5;
+  const score = Math.random() * 0.5 + 0.5; // 0.5–1.0
 
-  // Skew towards BULLISH (50 %) > BEARISH (35 %) > NEUTRAL (15 %)
-  let label: (typeof LABELS)[number];
-  if (roll < 0.50) {
-    label = 'BULLISH';
-  } else if (roll < 0.85) {
-    label = 'BEARISH';
-  } else {
-    label = 'NEUTRAL';
-  }
+  // Confidence varies by label: BULLISH 0.80–0.95, BEARISH 0.50–0.70
+  const confidence = isBullish
+    ? Math.random() * 0.15 + 0.8
+    : Math.random() * 0.2 + 0.5;
 
-  const score      = parseFloat((0.55 + Math.random() * 0.40).toFixed(3)); // 0.55–0.95
-  const confidence = parseFloat((0.70 + Math.random() * 0.28).toFixed(3)); // 0.70–0.98
-
-  return { label, score, confidence };
+  return {
+    score,
+    label: isBullish ? 'BULLISH' : 'BEARISH',
+    confidence,
+    source: 'MOCK_HF',
+  };
 }
