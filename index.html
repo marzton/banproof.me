@@ -195,8 +195,8 @@
       font-family: var(--display);
       font-size: clamp(2.8rem, 4.5vw, 4.5rem);
       font-weight: 800;
-      line-height: 1.0;
-      letter-spacing: -0.03em;
+      line-height: 0.85;
+      letter-spacing: -0.04em;
       color: #fff;
       margin-bottom: 1.5rem;
       opacity: 0;
@@ -760,6 +760,227 @@
       .nav-links { display: none; }
       .container { padding: 0 1.5rem; }
     }
+    /* ── ACCESS MODAL ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,10,13,0.88);
+      backdrop-filter: blur(8px);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--border-bright);
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+      transform: translateY(12px);
+      transition: transform 0.22s ease;
+    }
+
+    .modal-backdrop.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.5rem 1.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .modal-title {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .modal-title span { color: var(--green); }
+
+    .modal-close {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .modal-close:hover { border-color: var(--border-bright); color: var(--text); }
+
+    .modal-body {
+      padding: 1.5rem 1.75rem;
+    }
+
+    .modal-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 300;
+      padding: 0.6rem 0.75rem;
+      width: 100%;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a6075' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+      cursor: pointer;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: var(--dim); }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .modal-submit {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      background: var(--green);
+      color: var(--void);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .modal-submit:hover { opacity: 0.85; }
+    .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .modal-cancel {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .modal-cancel:hover { border-color: var(--border-bright); color: var(--text); }
+
+    /* Success state */
+    .modal-success {
+      display: none;
+      padding: 2.5rem 1.75rem;
+      text-align: center;
+    }
+
+    .modal-success.visible { display: block; }
+
+    .modal-success-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-success-title {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 0.6rem;
+    }
+
+    .modal-success-msg {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+      .modal-actions { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
@@ -776,7 +997,7 @@
     <li><a href="#pricing">Pricing</a></li>
     <li><a href="#cloudflare-status">Cloudflare status</a></li>
   </ul>
-  <a href="#pricing" class="nav-cta">Get access</a>
+  <a href="#pricing" class="nav-cta" data-modal="general">Get access</a>
 </nav>
 
 <!-- HERO -->
@@ -786,12 +1007,12 @@
       <span class="eyebrow-dot"></span>
       <span class="eyebrow-text">Network operational · 94 nodes live</span>
     </div>
-    <h1>The AI <span class="accent">gateway</span> that proves you're real.</h1>
+    <h1>The AI <span class="accent">gateway</span><br>for durable signal <span class="accent">highs</span>.</h1>
     <p class="hero-desc">
       Banproof filters AI agent traffic through a residential DePIN node network. Every request gets a Proof of Agency score. Clean data in. Verified signals out.
     </p>
     <div class="hero-actions">
-      <a href="#pricing" class="btn-primary">Request access</a>
+      <a href="#pricing" class="btn-primary" data-modal="general">Request access</a>
       <a href="#how" class="btn-ghost">See how it works</a>
     </div>
   </div>
@@ -1027,7 +1248,7 @@
           <li class="dim">Audit logs</li>
           <li class="dim">SLA guarantee</li>
         </ul>
-        <a href="#" class="btn-ghost" style="display:block; text-align:center;">Get started free</a>
+        <a href="mailto:hello@rmarston.com" class="btn-ghost" data-modal="developer" style="display:block; text-align:center;">Get started free</a>
       </div>
 
       <div class="price-card featured">
@@ -1043,7 +1264,7 @@
           <li>Custom risk thresholds</li>
           <li class="dim">Dedicated node pool</li>
         </ul>
-        <a href="#" class="btn-primary" style="display:block; text-align:center;">Start Pro trial</a>
+        <a href="mailto:hello@rmarston.com" class="btn-primary" data-modal="pro" style="display:block; text-align:center;">Start Pro trial</a>
       </div>
 
       <div class="price-card">
@@ -1059,7 +1280,7 @@
           <li>Onboarding & support</li>
           <li>White-label option</li>
         </ul>
-        <a href="mailto:hello@rmarston.com" class="btn-ghost" style="display:block; text-align:center;">Contact us</a>
+        <a href="mailto:hello@rmarston.com" class="btn-ghost" data-modal="enterprise" style="display:block; text-align:center;">Contact us</a>
       </div>
     </div>
   </div>
@@ -1073,7 +1294,7 @@
       <p class="cta-sub">Join the early access list. First 50 developers get Pro free for 3 months.</p>
     </div>
     <div style="display:flex; flex-direction:column; gap:1rem; min-width:260px;">
-      <a href="mailto:hello@rmarston.com" class="btn-primary" style="text-align:center;">Request early access</a>
+      <a href="mailto:hello@rmarston.com" class="btn-primary" data-modal="general" style="text-align:center;">Request early access</a>
       <a href="https://github.com/marzton/banproof.me" target="_blank" class="btn-ghost" style="text-align:center;">View on GitHub ↗</a>
     </div>
   </div>
@@ -1093,17 +1314,72 @@
   </div>
 </footer>
 
-<script>
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
+<!-- ACCESS MODAL -->
+<div id="access-modal" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+    <div class="modal-header">
+      <p class="modal-title" id="modal-title">Request <span>access.</span></p>
+      <button class="modal-close" id="modal-close-btn" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="modal-desc">
+        Join the early access list. First 50 developers get Pro free for 3 months. We'll follow up within one business day.
+      </p>
+      <form class="modal-form" id="modal-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="modal-name">Name</label>
+            <input class="form-input" id="modal-name" type="text" placeholder="Your name" required autocomplete="name">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="modal-email">Email</label>
+            <input class="form-input" id="modal-email" type="email" placeholder="you@company.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="modal-tier">Plan interest</label>
+          <select class="form-select" id="modal-tier">
+            <option value="developer">Developer — Free</option>
+            <option value="pro">Pro — $49 / mo</option>
+            <option value="enterprise">Enterprise — Custom</option>
+            <option value="general">Not sure yet</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="modal-notes">Use case <span style="color:var(--dim)">(optional)</span></label>
+          <textarea class="form-textarea" id="modal-notes" placeholder="Briefly describe what you're building or what support you need…"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="modal-submit" id="modal-submit">Send request</button>
+          <button type="button" class="modal-cancel" id="modal-cancel-btn">Cancel</button>
+        </div>
+      </form>
+      <div class="modal-success" id="modal-success" role="status">
+        <div class="modal-success-icon">◉</div>
+        <p class="modal-success-title">Email draft opened.</p>
+        <p class="modal-success-msg">We've opened an email draft in your mail client. Please review and send it to complete your access request. Keep an eye on <span id="modal-success-email" style="color:var(--text)"></span> for our reply.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+<script>
+  const revealElements = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    revealElements.forEach(el => observer.observe(el));
+  } else {
+    revealElements.forEach(el => el.classList.add('visible'));
+  }
 
   // Animate terminal lines in sequence
   const lines = document.querySelectorAll('.terminal-body div');
@@ -1145,6 +1421,114 @@
   }
 
   loadCloudflareMeta();
+
+  // ── ACCESS MODAL ──
+  (function () {
+    const backdrop  = document.getElementById('access-modal');
+    const modal     = backdrop.querySelector('.modal');
+    const form      = document.getElementById('modal-form');
+    const success   = document.getElementById('modal-success');
+    const tierEl    = document.getElementById('modal-tier');
+    const descEl    = document.getElementById('modal-desc');
+    const submitBtn = document.getElementById('modal-submit');
+    const emailInput = document.getElementById('modal-email');
+    const nameInput  = document.getElementById('modal-name');
+
+    const TIER_DESCS = {
+      developer: 'Get started free — 10k verified requests per month included. We\'ll follow up within one business day.',
+      pro:       'Start your Pro trial — 500k requests, advanced DRS, and priority residential nodes. First 50 developers get 3 months free.',
+      enterprise:'Contact our team about Enterprise pricing — dedicated node pool, custom PoA policy rules, and SLA guarantee.',
+      general:   'Join the early access list. First 50 developers get Pro free for 3 months. We\'ll follow up within one business day.',
+    };
+
+    // Focus management
+    let previousFocus = null;
+
+    function getFocusable() {
+      return Array.from(modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+    }
+
+    function openModal(tier) {
+      tier = tier || 'general';
+      previousFocus = document.activeElement;
+      // Reset state
+      form.style.display = '';
+      success.classList.remove('visible');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send request';
+      form.reset();
+      // Pre-select tier and set description
+      if (tierEl.querySelector('[value="' + tier + '"]')) tierEl.value = tier;
+      descEl.textContent = TIER_DESCS[tier] || TIER_DESCS.general;
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => nameInput.focus(), 50);
+    }
+
+    function closeModal() {
+      backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send request';
+      if (previousFocus) { previousFocus.focus(); previousFocus = null; }
+    }
+
+    // Wire all modal trigger buttons
+    document.querySelectorAll('[data-modal]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal(btn.getAttribute('data-modal'));
+      });
+    });
+
+    // Close controls
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) closeModal();
+    });
+
+    // Keyboard: Escape to close, Tab/Shift+Tab focus trap
+    document.addEventListener('keydown', function (e) {
+      if (!backdrop.classList.contains('open')) return;
+      if (e.key === 'Escape') { closeModal(); return; }
+      if (e.key === 'Tab') {
+        const focusable = getFocusable();
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last  = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+        }
+      }
+    });
+
+    // Form submit — browser validates required + email format; opens mailto draft
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Opening draft…';
+      const name  = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const tier    = tierEl.options[tierEl.selectedIndex].text;
+      const notes   = document.getElementById('modal-notes').value.trim();
+      const subject = encodeURIComponent('Banproof access request — ' + tier);
+      const body    = encodeURIComponent(
+        'Name: ' + name + '\nEmail: ' + email + '\nPlan: ' + tier +
+        (notes ? '\n\nNotes:\n' + notes : '')
+      );
+      window.location.href = 'mailto:hello@rmarston.com?subject=' + subject + '&body=' + body;
+      setTimeout(function () {
+        form.style.display = 'none';
+        document.getElementById('modal-success-email').textContent = email;
+        success.classList.add('visible');
+      }, 400);
+    });
+  }());
 </script>
 </body>
 </html>

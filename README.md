@@ -1,28 +1,24 @@
-# banproof.me | The Personal Registry & AI Gateway
-    
-    ## 🏛️ The Corporate Architect (Foundational Logic)
-    Derived from the systems intelligence of Jack Wren (BBDO, 1948-53).
-    
-    ### The Wren Maneuvers (Data Policy)
-    * **Signal Filtering:** All business inputs are treated as signals categorized by Risk (DRS) and Strategic Opportunity.
-    * **The Sponsorship Guardrail:** Strict separation of Public milestones (GitHub) and Private narratives (NotebookLM).
-    * **Architectural Triggers:** Scaling is dictated by System Complexity, not just capital.
-    
-    ## 🚀 Active Projects & Scaling Triggers
-    | Project | Current Phase | Next Trigger (Action) |
-    | :--- | :--- | :--- |
-    | **Gold Shore AI** | Prototyping DRS | > 50 automated claims (Hire Ops) |
-    | **Wayward Traveler** | Veo 3.1 Testing | > 10 videos/week (Deploy Agent) |
-    | **SOLEFOODNY** | Architecture | Beta Launch (Relocation Review) |
-    
-    ## 🛰️ Infrastructure: AI VPN & Node Network
-    * **Goal:** Establish a DePIN (Decentralentralized Physical Infrastructure Network) for AI agents.
-    * **Proof of Agency:** Using physical residential nodes to provide "Proof of Humanity" for autonomous crawlers.
-    * **Toll Booth Logic:** Monetization via per-request verification and clean data delivery.
-    
-    ## 🛠️ Tech Stack
-    * **Logic:** Claude / Gemini / Small Language Models (SLMs)
-    * **Automation:** Google Antigravity (Agentic IDE)
-    * **Visuals:** Google AI Studio (Veo 3.1)
-    * **Networking:** Cloudflare WAF / Tailscale Exit Nodes
-    
+# Durable Intelligence Architecture Documentation
+
+## Gatekeeper
+- Description of Gatekeeper's role in the architecture and its integrations.
+
+## Engine
+- Overview of the Engine component, functionalities, and its importance.
+
+## D1 & KV Components
+- Detailing the D1 and KV components, including use cases and configurations.
+
+## Intelligence Stack
+- Insight into the Intelligence Stack, its components, and how they work together.
+
+## Subscription Tiers
+- Explanation of different subscription tiers available to users and their benefits.
+
+## Development & Deployment
+- Guidance on the development and deployment processes, best practices, and tools used.
+
+## Security Policy
+- Outline of the security policies in place to protect user data and system integrity.
+
+*Updated on 2026-04-01 to include sections on Durable Intelligence Architecture.*
