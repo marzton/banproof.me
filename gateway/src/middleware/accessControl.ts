@@ -76,7 +76,7 @@ export const accessControlMiddleware: MiddlewareHandler = async (c, next) => {
       const base = extractClaims(identity);
       accessContext = { ...base, ipAddress, timestamp: Date.now() };
       console.log(
-        `[Access Control] Zero-Edge SSO accepted — user=${identity.email} role=${identity.role} tier=${identity.tierLevel}`,
+        `[Access Control] Zero-Edge SSO accepted — role=${identity.role} tier=${identity.tierLevel}`,
       );
     } catch (err) {
       // Invalid JWT — reject immediately; do not fall back to agent token
