@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>banproof.me · Sandbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080a0d;
+      --surface:   #0d1117;
+      --panel:     #111820;
+      --border:    #1e2a38;
+      --border-hi: #2d3f52;
+      --text:      #c8d6e5;
+      --muted:     #4a6075;
+      --dim:       #2a3a4a;
+      --green:     #00e5a0;
+      --green-dim: rgba(0,229,160,.10);
+      --amber:     #f5a623;
+      --amber-dim: rgba(245,166,35,.10);
+      --red:       #ff4757;
+      --red-dim:   rgba(255,71,87,.10);
+      --blue:      #3d8ef0;
+      --blue-dim:  rgba(61,142,240,.10);
+      --mono: 'IBM Plex Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── GRID ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    * { position: relative; z-index: 1; }
+
+    /* ── LAYOUT ── */
+    .header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,10,13,0.94);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-logo .slash { color: var(--muted); }
+    .header-logo .page  { color: var(--green); }
+
+    .header-tag {
+      font-size: 10px;
+      color: var(--green);
+      border: 1px solid var(--green);
+      padding: 2px 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      height: calc(100vh - 53px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      overflow-y: auto;
+      background: var(--surface);
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-heading {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 16px 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    .sidebar-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      text-align: left;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-btn:hover   { color: var(--text); background: var(--panel); }
+    .sidebar-btn.active  { color: var(--green); background: var(--green-dim); }
+
+    .sidebar-btn .dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      margin-right: 8px;
+      vertical-align: middle;
+      margin-top: -1px;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+
+    .panel-title {
+      font-family: var(--display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .panel-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    /* ── SANDBOX PANELS ── */
+    .sandbox-panel {
+      display: none;
+    }
+
+    .sandbox-panel.active {
+      display: block;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--green);
+    }
+
+    .field input::placeholder { color: var(--dim); }
+
+    /* ── QUICK-FIRE PRESETS ── */
+    .presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .preset-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover { border-color: var(--border-hi); color: var(--text); }
+    .preset-btn.green { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+    .preset-btn.red   { border-color: var(--red);   color: var(--red);   background: var(--red-dim); }
+    .preset-btn.amber { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+      font-weight: 500;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-green  { background: var(--green);  color: #000; }
+    .btn-ghost  { background: var(--panel);  color: var(--muted); border: 1px solid var(--border); }
+    .btn-red    { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    /* ── RESULT OUTPUT ── */
+    .result-box {
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.7;
+      overflow: hidden;
+    }
+
+    .result-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .result-bar .status-badge {
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .status-badge.pass  { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+    .status-badge.fail  { background: var(--red-dim);   color: var(--red);   border: 1px solid var(--red); }
+    .status-badge.warn  { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
+    .status-badge.idle  { background: var(--panel);     color: var(--muted); border: 1px solid var(--border); }
+
+    .result-body {
+      padding: 14px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text);
+      min-height: 80px;
+    }
+
+    .result-body .k { color: var(--blue); }
+    .result-body .v-str { color: var(--green); }
+    .result-body .v-num { color: var(--amber); }
+    .result-body .v-bool-true  { color: var(--green); }
+    .result-body .v-bool-false { color: var(--red); }
+    .result-body .v-null { color: var(--muted); }
+    .result-body .brace  { color: var(--muted); }
+
+    /* ── COMPONENT SHOWCASE ── */
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .component-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 18px;
+    }
+
+    .component-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      margin: 2px;
+      border: 1px solid;
+    }
+
+    .badge-green { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+    .badge-red   { background: var(--red-dim);   color: var(--red);   border-color: var(--red); }
+    .badge-amber { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+    .badge-blue  { background: var(--blue-dim);  color: var(--blue);  border-color: var(--blue); }
+    .badge-muted { background: var(--panel);     color: var(--muted); border-color: var(--border); }
+
+    /* ── POA SCORE METER ── */
+    .score-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .score-track {
+      height: 4px;
+      background: var(--dim);
+      width: 100%;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.5s ease;
+    }
+
+    .score-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── STATUS INDICATOR ── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.live  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    .status-dot.warn  { background: var(--amber); }
+    .status-dot.error { background: var(--red); }
+    .status-dot.idle  { background: var(--muted); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* ── TEST MATRIX ── */
+    .test-matrix {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .test-matrix table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .test-matrix th {
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .test-matrix td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .test-matrix tr:last-child td { border-bottom: none; }
+    .test-matrix tr:hover td { background: var(--panel); }
+
+    .run-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .run-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    banproof.me <span class="slash">/</span> <span class="page">sandbox</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="status-row" style="margin:0;">
+      <div class="status-dot live"></div>
+      <span style="font-size:10px;color:var(--muted);">Gateway modules loaded</span>
+    </div>
+    <span class="header-tag">Dev Mode</span>
+    <span style="font-size:10px;color:var(--amber);margin-left:4px;opacity:0.8;">⚠ Sandbox — uses placeholder dev credentials only</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Validators</div>
+      <button class="sidebar-btn active" data-panel="poa" onclick="showPanel('poa', this)">
+        <span class="dot"></span>proofOfAgency
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Middleware</div>
+      <button class="sidebar-btn" data-panel="tollbooth" onclick="showPanel('tollbooth', this)">
+        <span class="dot"></span>tollBooth
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Components</div>
+      <button class="sidebar-btn" data-panel="components" onclick="showPanel('components', this)">
+        <span class="dot"></span>UI Components
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Test Matrix</div>
+      <button class="sidebar-btn" data-panel="matrix" onclick="showPanel('matrix', this)">
+        <span class="dot"></span>Scenario Runner
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ══ PANEL: proofOfAgency ══ -->
+    <div id="panel-poa" class="sandbox-panel active">
+      <div class="panel-title">proofOfAgency validator</div>
+      <div class="panel-desc">
+        Runs the <code>validateProofOfAgency()</code> function in-browser against different token/IP combinations.<br>
+        Mirrors the logic in <code>gateway/src/validators/proofOfAgency.ts</code>.
+      </div>
+
+      <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Quick Presets</div>
+      <div class="presets">
+        <button class="preset-btn green" onclick="applyPreset('valid-trusted')">✓ Valid + Trusted IP</button>
+        <button class="preset-btn amber" onclick="applyPreset('valid-unknown')">~ Valid + Unknown IP</button>
+        <button class="preset-btn red"   onclick="applyPreset('valid-untrusted')">✕ Valid + Untrusted IP</button>
+        <button class="preset-btn red"   onclick="applyPreset('bad-token')">✕ Bad Token</button>
+        <button class="preset-btn red"   onclick="applyPreset('empty-token')">✕ Empty Token</button>
+      </div>
+
+      <div class="field">
+        <label>Agent Token</label>
+        <input type="text" id="poa-token" placeholder="secret_agent_key_2026" value="secret_agent_key_2026">
+      </div>
+
+      <div class="field">
+        <label>Node IP (X-Forwarded-For)</label>
+        <input type="text" id="poa-ip" placeholder="100.100.100.1 · 127.0.0.1 · unknown" value="100.100.100.1">
+      </div>
+
+      <!-- Score Meter -->
+      <div style="margin-top:4px;margin-bottom:16px;max-width:520px;">
+        <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">PoA Score Preview</div>
+        <div class="score-meter">
+          <div class="score-track"><div class="score-fill" id="poa-meter" style="width:0%;"></div></div>
+          <div class="score-labels"><span>0</span><span id="poa-score-label">—</span><span>100</span></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="runPoaValidation()">Run Validation</button>
+        <button class="btn btn-ghost" onclick="clearResult('poa-result')">Clear</button>
+      </div>
+
+      <div id="poa-result" class="result-box">
+        <div class="result-bar">
+          Output <span id="poa-status" class="status-badge idle">Idle</span>
+        </div>
+        <div class="result-body" id="poa-output">-- awaiting run --</div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: tollBooth ══ -->
+    <div id="panel-tollbooth" class="sandbox-panel">
+      <div class="panel-title">tollBooth middleware</div>
+      <div class="panel-desc">
+        Simulates the full <code>tollBoothMiddleware</code> pipeline — token extraction,
+        PoA validation, and context assignment. Mirrors <code>gateway/src/middleware/tollBooth.ts</code>.
+      </div>
+
+      <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Quick Presets</div>
+      <div class="presets">
+        <button class="preset-btn green" onclick="applyTBPreset('full-pass')">✓ Full Pass</button>
+        <button class="preset-btn red"   onclick="applyTBPreset('no-auth')">✕ No Auth Header</button>
+        <button class="preset-btn red"   onclick="applyTBPreset('bad-token')">✕ Wrong Token</button>
+        <button class="preset-btn red"   onclick="applyTBPreset('bad-ip')">✕ Untrusted IP</button>
+        <button class="preset-btn amber" onclick="applyTBPreset('localhost')">~ Localhost</button>
+      </div>
+
+      <div class="field">
+        <label>Authorization Header</label>
+        <input type="text" id="tb-auth" placeholder="Bearer secret_agent_key_2026" value="Bearer secret_agent_key_2026">
+      </div>
+
+      <div class="field">
+        <label>X-Forwarded-For (Node IP)</label>
+        <input type="text" id="tb-ip" placeholder="100.100.100.1" value="100.100.100.1">
+      </div>
+
+      <div class="field">
+        <label>Route (for reference)</label>
+        <select id="tb-route">
+          <option value="/api/status">/api/status</option>
+          <option value="/api/verify">/api/verify</option>
+          <option value="/api/data/goldshore">/api/data/goldshore</option>
+          <option value="/public/milestones">/public/milestones</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="runTollBooth()">Simulate Request</button>
+        <button class="btn btn-ghost" onclick="clearResult('tb-result')">Clear</button>
+      </div>
+
+      <div id="tb-result" class="result-box">
+        <div class="result-bar">
+          Middleware Response <span id="tb-status" class="status-badge idle">Idle</span>
+        </div>
+        <div class="result-body" id="tb-output">-- awaiting simulation --</div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: UI Components ══ -->
+    <div id="panel-components" class="sandbox-panel">
+      <div class="panel-title">UI Components</div>
+      <div class="panel-desc">Visual reference for all reusable interface components used across banproof.me dashboards.</div>
+
+      <div class="divider"></div>
+
+      <!-- Badges -->
+      <div class="component-card" style="margin-bottom:16px;">
+        <div class="component-label">Status Badges</div>
+        <span class="badge badge-green">Live</span>
+        <span class="badge badge-amber">Pending</span>
+        <span class="badge badge-red">Rejected</span>
+        <span class="badge badge-blue">Processing</span>
+        <span class="badge badge-muted">Idle</span>
+        <br><br>
+        <span class="badge badge-green">DRS: LOW</span>
+        <span class="badge badge-amber">DRS: MEDIUM</span>
+        <span class="badge badge-red">DRS: HIGH</span>
+      </div>
+
+      <!-- Status dots -->
+      <div class="component-card" style="margin-bottom:16px;">
+        <div class="component-label">Status Indicators</div>
+        <div class="status-row"><div class="status-dot live"></div> Gateway Operational (live pulse)</div>
+        <div class="status-row"><div class="status-dot warn"></div> DePIN sync degraded</div>
+        <div class="status-row"><div class="status-dot error"></div> Toll Booth offline</div>
+        <div class="status-row"><div class="status-dot idle"></div> Module standby</div>
+      </div>
+
+      <!-- Score meters -->
+      <div class="component-card" style="margin-bottom:16px;">
+        <div class="component-label">PoA Score Meters</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Score 95 — Trusted Node</div>
+            <div class="score-track"><div class="score-fill" style="width:95%;background:var(--green);"></div></div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Score 20 — Untrusted IP</div>
+            <div class="score-track"><div class="score-fill" style="width:20%;background:var(--amber);"></div></div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Score 0 — Invalid Token</div>
+            <div class="score-track"><div class="score-fill" style="width:0%;background:var(--red);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result boxes -->
+      <div class="component-card">
+        <div class="component-label">Result Box States</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="result-box">
+            <div class="result-bar">Pass <span class="status-badge pass">200 OK</span></div>
+            <div class="result-body" style="min-height:auto;padding:10px 14px;">{ "isValid": <span class="v-bool-true">true</span>, "score": <span class="v-num">95</span>, "riskLevel": <span class="v-str">"LOW"</span> }</div>
+          </div>
+          <div class="result-box">
+            <div class="result-bar">Fail <span class="status-badge fail">403 Forbidden</span></div>
+            <div class="result-body" style="min-height:auto;padding:10px 14px;">{ "error": <span class="v-str">"Proof of Agency failure: Invalid token."</span> }</div>
+          </div>
+          <div class="result-box">
+            <div class="result-bar">Warn <span class="status-badge warn">403 Forbidden</span></div>
+            <div class="result-body" style="min-height:auto;padding:10px 14px;">{ "error": <span class="v-str">"Proof of Agency failure: Execution node IP not part of DePIN registry."</span> }</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: Test Matrix ══ -->
+    <div id="panel-matrix" class="sandbox-panel">
+      <div class="panel-title">Scenario Runner</div>
+      <div class="panel-desc">
+        Run all predefined test scenarios in sequence to validate both modules in one pass.
+        <br>Mirrors the scenarios covered by <code>npm test</code> in <code>gateway/</code>.
+      </div>
+
+      <div class="btn-row" style="margin-bottom:20px;">
+        <button class="btn btn-green" onclick="runAllScenarios()">Run All Scenarios</button>
+        <button class="btn btn-ghost" onclick="resetMatrix()">Reset</button>
+        <span id="matrix-summary" style="font-size:10px;color:var(--muted);margin-left:8px;"></span>
+      </div>
+
+      <div class="test-matrix">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Module</th>
+              <th>Scenario</th>
+              <th>Token</th>
+              <th>IP</th>
+              <th>Expected</th>
+              <th>Result</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── Panel navigation ─────────────────────────────────────────────
+  function showPanel(id, btn) {
+    document.querySelectorAll('.sandbox-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'matrix') buildMatrix();
+  }
+
+  // ── In-browser PoA validator (mirrors proofOfAgency.ts) ─────────
+  // Dev-only placeholder — matches the hardcoded value in proofOfAgency.ts.
+  // Replace with environment-driven config before any real deployment.
+  const VALID_TOKEN = 'secret_agent_key_2026';
+  const TRUSTED_IPS = ['100.100.100.1', '100.200.200.2'];
+
+  function validatePoA({ ip, token }) {
+    if (!token || token !== VALID_TOKEN) {
+      return { isValid: false, score: 0, riskLevel: 'HIGH', reason: 'Invalid or missing agent token.' };
+    }
+    const trusted = TRUSTED_IPS.includes(ip);
+    if (!trusted && ip !== 'unknown' && ip !== '127.0.0.1') {
+      return { isValid: false, score: 20, riskLevel: 'MEDIUM', reason: 'Execution node IP not part of DePIN registry.' };
+    }
+    return { isValid: true, score: 95, riskLevel: 'LOW' };
+  }
+
+  // ── In-browser tollBooth simulator (mirrors tollBooth.ts) ────────
+  function simulateTollBooth({ authHeader, ip, route }) {
+    const log = [];
+    log.push(`[Toll Booth] Intercepted GET request to http://localhost${route}`);
+
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1]?.trim() : null;
+    if (!token) {
+      return { status: 401, body: { error: 'Unauthorized. The Toll Booth requires payment or valid PoA token.' }, log };
+    }
+
+    const poa = validatePoA({ ip: ip || 'unknown', token });
+    if (!poa.isValid) {
+      log.push(`[Toll Booth] Rejected request. Match failed: ${poa.reason}`);
+      return { status: 403, body: { error: `Proof of Agency failure: ${poa.reason}` }, log };
+    }
+
+    log.push(`[Toll Booth] Signal accepted. Risk Level: ${poa.riskLevel}`);
+    return { status: 200, body: { message: 'Gateway status: Operational', poaScore: poa.score }, log };
+  }
+
+  // ── HTML escaping (prevents XSS when setting innerHTML) ─────────
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ── JSON Pretty Printer with syntax highlighting ──────────────────
+  // escHtml() is applied to the raw JSON before any span injection so
+  // user-supplied text (ip, token, route) can never inject HTML.
+  function prettify(obj) {
+    const json = escHtml(JSON.stringify(obj, null, 2));
+    return json
+      .replace(/(&quot;[\w]+&quot;)\s*:/g, '<span class="k">$1</span>:')
+      .replace(/:\s*(&quot;.*?&quot;)/g, (m, s) => m.replace(s, `<span class="v-str">${s}</span>`))
+      .replace(/:\s*(\d+)/g,    (m, n) => m.replace(n, `<span class="v-num">${n}</span>`))
+      .replace(/:\s*(true)/g,   (m, b) => m.replace(b, `<span class="v-bool-true">${b}</span>`))
+      .replace(/:\s*(false)/g,  (m, b) => m.replace(b, `<span class="v-bool-false">${b}</span>`))
+      .replace(/:\s*(null)/g,   (m, n) => m.replace(n, `<span class="v-null">${n}</span>`));
+  }
+
+  // ── PoA Panel ────────────────────────────────────────────────────
+  function applyPreset(name) {
+    const presets = {
+      'valid-trusted':   { token: 'secret_agent_key_2026', ip: '100.100.100.1' },
+      'valid-unknown':   { token: 'secret_agent_key_2026', ip: 'unknown' },
+      'valid-untrusted': { token: 'secret_agent_key_2026', ip: '203.0.113.42' },
+      'bad-token':       { token: 'wrong_token',           ip: '100.100.100.1' },
+      'empty-token':     { token: '',                      ip: '100.100.100.1' },
+    };
+    const p = presets[name];
+    if (!p) return;
+    document.getElementById('poa-token').value = p.token;
+    document.getElementById('poa-ip').value = p.ip;
+    runPoaValidation();
+  }
+
+  function runPoaValidation() {
+    const token = document.getElementById('poa-token').value.trim();
+    const ip    = document.getElementById('poa-ip').value.trim() || 'unknown';
+    const result = validatePoA({ ip, token });
+
+    // Meter
+    const meter = document.getElementById('poa-meter');
+    const label = document.getElementById('poa-score-label');
+    const pct = result.score + '%';
+    meter.style.width = pct;
+    meter.style.background = result.riskLevel === 'LOW' ? 'var(--green)' : result.riskLevel === 'MEDIUM' ? 'var(--amber)' : 'var(--red)';
+    label.textContent = result.score;
+
+    // Output
+    const statusEl = document.getElementById('poa-status');
+    statusEl.textContent = result.isValid ? 'PASS' : (result.riskLevel === 'MEDIUM' ? 'WARN' : 'FAIL');
+    statusEl.className = 'status-badge ' + (result.isValid ? 'pass' : result.riskLevel === 'MEDIUM' ? 'warn' : 'fail');
+    document.getElementById('poa-output').innerHTML = prettify(result);
+  }
+
+  // ── Toll Booth Panel ─────────────────────────────────────────────
+  function applyTBPreset(name) {
+    const presets = {
+      'full-pass':  { auth: 'Bearer secret_agent_key_2026', ip: '100.100.100.1' },
+      'no-auth':    { auth: '',                              ip: '100.100.100.1' },
+      'bad-token':  { auth: 'Bearer wrong_token',           ip: '100.100.100.1' },
+      'bad-ip':     { auth: 'Bearer secret_agent_key_2026', ip: '203.0.113.42'  },
+      'localhost':  { auth: 'Bearer secret_agent_key_2026', ip: '127.0.0.1'     },
+    };
+    const p = presets[name];
+    if (!p) return;
+    document.getElementById('tb-auth').value = p.auth;
+    document.getElementById('tb-ip').value   = p.ip;
+    runTollBooth();
+  }
+
+  function runTollBooth() {
+    const auth  = document.getElementById('tb-auth').value.trim();
+    const ip    = document.getElementById('tb-ip').value.trim() || 'unknown';
+    const route = document.getElementById('tb-route').value;
+    const result = simulateTollBooth({ authHeader: auth, ip, route });
+
+    const statusEl = document.getElementById('tb-status');
+    const cls = result.status === 200 ? 'pass' : result.status === 401 ? 'fail' : 'warn';
+    statusEl.textContent = result.status === 200 ? '200 OK' : result.status === 401 ? '401 Unauthorized' : '403 Forbidden';
+    statusEl.className = 'status-badge ' + cls;
+
+    const logHtml = result.log.map(l => `<span style="color:var(--muted);">${escHtml(l)}</span>`).join('\n');
+    document.getElementById('tb-output').innerHTML = logHtml + '\n\n' + prettify(result.body);
+  }
+
+  // ── Clear result ─────────────────────────────────────────────────
+  function clearResult(id) {
+    const box = document.getElementById(id);
+    if (!box) return;
+    box.querySelector('.result-body').textContent = '-- cleared --';
+    const sb = box.querySelector('.status-badge');
+    if (sb) { sb.textContent = 'Idle'; sb.className = 'status-badge idle'; }
+    const meter = document.getElementById('poa-meter');
+    if (meter) { meter.style.width = '0%'; }
+    const label = document.getElementById('poa-score-label');
+    if (label) label.textContent = '—';
+  }
+
+  // ── Test Matrix ───────────────────────────────────────────────────
+  const SCENARIOS = [
+    // proofOfAgency scenarios
+    { module: 'proofOfAgency', label: 'Valid token + trusted IP',   token: 'secret_agent_key_2026', ip: '100.100.100.1', expected: 'PASS (LOW, 95)' },
+    { module: 'proofOfAgency', label: 'Valid token + trusted IP #2', token: 'secret_agent_key_2026', ip: '100.200.200.2', expected: 'PASS (LOW, 95)' },
+    { module: 'proofOfAgency', label: 'Valid token + localhost',     token: 'secret_agent_key_2026', ip: '127.0.0.1',     expected: 'PASS (LOW, 95)' },
+    { module: 'proofOfAgency', label: 'Valid token + unknown IP',    token: 'secret_agent_key_2026', ip: 'unknown',       expected: 'PASS (LOW, 95)' },
+    { module: 'proofOfAgency', label: 'Valid token + untrusted IP',  token: 'secret_agent_key_2026', ip: '203.0.113.42',  expected: 'FAIL (MEDIUM, 20)' },
+    { module: 'proofOfAgency', label: 'Wrong token',                 token: 'wrong_token',           ip: '100.100.100.1', expected: 'FAIL (HIGH, 0)' },
+    { module: 'proofOfAgency', label: 'Empty token',                 token: '',                      ip: '100.100.100.1', expected: 'FAIL (HIGH, 0)' },
+    // tollBooth scenarios
+    { module: 'tollBooth',     label: 'No auth header',             token: null,                    ip: '100.100.100.1', expected: '401 Unauthorized' },
+    { module: 'tollBooth',     label: 'Wrong token',                token: 'wrong_token',            ip: '100.100.100.1', expected: '403 Forbidden' },
+    { module: 'tollBooth',     label: 'Valid token + untrusted IP', token: 'secret_agent_key_2026',  ip: '203.0.113.42',  expected: '403 Forbidden' },
+    { module: 'tollBooth',     label: 'Valid token + trusted IP',   token: 'secret_agent_key_2026',  ip: '100.100.100.1', expected: '200 OK (score:95)' },
+    { module: 'tollBooth',     label: 'Valid token + no IP header', token: 'secret_agent_key_2026',  ip: 'unknown',       expected: '200 OK (score:95)' },
+  ];
+
+  function buildMatrix() {
+    const tbody = document.getElementById('matrix-body');
+    tbody.innerHTML = SCENARIOS.map((s, i) => `
+      <tr id="row-${i}">
+        <td style="color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
+        <td><span class="badge ${s.module === 'proofOfAgency' ? 'badge-blue' : 'badge-amber'}" style="font-size:9px;">${s.module}</span></td>
+        <td>${s.label}</td>
+        <td style="color:var(--muted);font-size:11px;">${s.token === null ? '—' : (s.token || '(empty)')}</td>
+        <td style="color:var(--muted);font-size:11px;">${s.ip}</td>
+        <td style="color:var(--muted);font-size:11px;">${s.expected}</td>
+        <td id="result-${i}"><span class="status-badge idle">—</span></td>
+        <td><button class="run-btn" onclick="runScenario(${i})">Run</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function runScenario(i) {
+    const s = SCENARIOS[i];
+    const cell = document.getElementById('result-' + i);
+
+    let actual, pass;
+    if (s.module === 'proofOfAgency') {
+      const r = validatePoA({ ip: s.ip, token: s.token || '' });
+      const exp = s.expected;
+      pass = (exp.startsWith('PASS') && r.isValid) || (exp.startsWith('FAIL') && !r.isValid);
+      actual = r.isValid ? `PASS (${r.riskLevel}, ${r.score})` : `FAIL (${r.riskLevel}, ${r.score})`;
+    } else {
+      const auth = s.token === null ? '' : `Bearer ${s.token}`;
+      const r = simulateTollBooth({ authHeader: auth, ip: s.ip, route: '/api/status' });
+      pass = (s.expected.startsWith('200') && r.status === 200) ||
+             (s.expected.startsWith('401') && r.status === 401) ||
+             (s.expected.startsWith('403') && r.status === 403);
+      actual = `${r.status} ${r.status === 200 ? 'OK' : r.status === 401 ? 'Unauthorized' : 'Forbidden'}`;
+    }
+
+    cell.innerHTML = `<span class="status-badge ${pass ? 'pass' : 'fail'}">${actual}</span>`;
+    updateMatrixSummary();
+  }
+
+  function runAllScenarios() {
+    buildMatrix();
+    SCENARIOS.forEach((_, i) => {
+      setTimeout(() => runScenario(i), i * 60);
+    });
+    setTimeout(updateMatrixSummary, SCENARIOS.length * 60 + 100);
+  }
+
+  function resetMatrix() {
+    buildMatrix();
+    document.getElementById('matrix-summary').textContent = '';
+  }
+
+  function updateMatrixSummary() {
+    const badges = document.querySelectorAll('#matrix-body .status-badge');
+    let pass = 0, fail = 0;
+    badges.forEach(b => {
+      if (b.classList.contains('pass')) pass++;
+      else if (b.classList.contains('fail')) fail++;
+    });
+    const total = pass + fail;
+    if (total === 0) return;
+    const el = document.getElementById('matrix-summary');
+    el.textContent = `${pass}/${total} passed`;
+    el.style.color = fail === 0 ? 'var(--green)' : 'var(--red)';
+  }
+
+  // Init matrix on load if that panel ever opens
+  document.addEventListener('DOMContentLoaded', () => {
+    buildMatrix();
+  });
+</script>
+</body>
+</html>
