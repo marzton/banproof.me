@@ -15,8 +15,8 @@ zone_name = "banproof.me"
 enabled = true
 
 # ── Cloudflare Access (Zero-Edge SSO) ─────────────────────────
-# CF_ACCESS_AUDIENCE and CF_ZERO_EDGE_PUBLIC_KEY are secrets;
-# set them with `wrangler secret put <KEY> --config gateway/wrangler.toml`
+# CF_ZERO_EDGE_PUBLIC_KEY is a secret; set it with:
+# `wrangler secret put CF_ZERO_EDGE_PUBLIC_KEY --config gateway/wrangler.toml`
 [vars]
 CF_ACCESS_AUDIENCE = "https://banproof-core.marzton.workers.dev"
 
