@@ -56,14 +56,30 @@ app.use('/api/pro/*', async (c, next) => {
 // ── POST /api/pro/analyze ─────────────────────────────────────
 // Triggers a BanproofEngine workflow instance.
 app.post('/api/pro/analyze', async (c) => {
-  const { query, userId } = await c.req.json<{
-    query: string;
-    userId: string;
-  }>();
-
-  if (!query || !userId) {
-    return c.json({ error: 'query and userId are required.' }, 400);
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ success: false, error: 'Invalid JSON body' }, 400);
   }
+
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    typeof (body as { query?: unknown }).query !== 'string'
+  ) {
+    return c.json(
+      { success: false, error: 'Invalid request body: "query" (string) is required' },
+      400,
+    );
+  }
+
+  const userId = c.req.header('x-user-id');
+  if (!userId) {
+    return c.json({ success: false, error: 'Missing or invalid user identity' }, 401);
+  }
+
+  const { query } = body as { query: string };
 
   const instance = await c.env.ENGINE.create({
     params: { query, userId },
