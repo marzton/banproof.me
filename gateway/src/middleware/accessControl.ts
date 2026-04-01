@@ -18,7 +18,7 @@ import { validateProofOfAgency } from '../validators/proofOfAgency.js';
 interface RoutePermission {
   pathPrefix: string;
   method?: string; // undefined = all methods
-  requiredRole: string;
+  requiredRole: UserRole | TierLevel;
   requireTrustedIp: boolean;
 }
 

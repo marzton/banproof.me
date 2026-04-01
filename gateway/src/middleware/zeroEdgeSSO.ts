@@ -187,9 +187,12 @@ export function extractClaims(identity: ZeroEdgeIdentity): AccessContext {
  * (e.g. agency) satisfies a lower requirement (e.g. pro).
  *
  * Hierarchy: public = free (0) < pro (2) < agency (3) < admin (4)
+ *
+ * An unknown `requiredRole` value defaults to MAX_SAFE_INTEGER so that
+ * mis-configured routes deny access rather than accidentally granting it.
  */
-export function enforceRBAC(context: AccessContext, requiredRole: string): boolean {
-  const required = ROLE_LEVELS[requiredRole] ?? 0;
+export function enforceRBAC(context: AccessContext, requiredRole: UserRole | TierLevel): boolean {
+  const required = ROLE_LEVELS[requiredRole] ?? Number.MAX_SAFE_INTEGER;
   const byRole = ROLE_LEVELS[context.identity.role] ?? 0;
   const byTier = ROLE_LEVELS[context.identity.tierLevel] ?? 0;
   return Math.max(byRole, byTier) >= required;
