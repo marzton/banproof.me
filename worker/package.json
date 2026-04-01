@@ -1,0 +1,24 @@
+{
+  "name": "banproof-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Banproof Gatekeeper — Cloudflare Worker with Turnstile, D1, KV, AI and Email",
+  "scripts": {
+    "dev":              "wrangler dev --config wrangler.toml",
+    "deploy":           "wrangler deploy --config wrangler.toml",
+    "tail":             "wrangler tail --config wrangler.toml",
+    "db:create":        "wrangler d1 create prod-core-db",
+    "db:migrate":       "wrangler d1 execute prod-core-db --file=../schema.sql --config wrangler.toml",
+    "db:migrate:local": "wrangler d1 execute prod-core-db --local --file=../schema.sql --config wrangler.toml",
+    "kv:create":        "wrangler kv namespace create banproof-cache",
+    "types":            "wrangler types --config wrangler.toml"
+  },
+  "dependencies": {
+    "hono": "^4.12.9"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260401.1",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.79.0"
+  }
+}

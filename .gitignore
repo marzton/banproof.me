@@ -5,8 +5,10 @@
 .env*
 !.env.example
 
-# dependencies
+# Node dependencies
 node_modules/
+worker/node_modules/
+gateway/node_modules/
 
 # test coverage output
 coverage/
