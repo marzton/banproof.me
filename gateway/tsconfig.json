@@ -6,6 +6,8 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*"]
