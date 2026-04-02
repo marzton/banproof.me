@@ -27,6 +27,7 @@ export const tollBoothMiddleware: MiddlewareHandler = async (c: any, next: any) 
   
   // Custom headers to pass on to the handler downstream
   c.set('poaScore', poaResult.score);
+  c.set('userId', token);
 
   await next();
 };
