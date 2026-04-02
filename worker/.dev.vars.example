@@ -1,0 +1,54 @@
+# ============================================================
+# .dev.vars.example — Banproof Core Worker
+# ============================================================
+# Copy this file to .dev.vars (git-ignored) and fill in values
+# for local development with `wrangler dev`.
+#
+# For production secrets run:
+#   wrangler secret put <KEY_NAME> --config wrangler.toml
+# ============================================================
+
+# ── Cloudflare Turnstile ─────────────────────────────────────
+# Dashboard → Turnstile → Add Site (choose "Invisible" widget)
+#   Site Key   → paste into wrangler.toml [vars] TURNSTILE_SITE_KEY
+#   Secret Key → paste here (and `wrangler secret put` in prod)
+TURNSTILE_SECRET_KEY=
+
+# ── Stripe ───────────────────────────────────────────────────
+# dashboard.stripe.com → Developers → API keys
+STRIPE_SECRET_KEY=
+
+# dashboard.stripe.com → Webhooks → your endpoint → Signing secret
+STRIPE_WEBHOOK_SECRET=
+
+# dashboard.stripe.com → Product catalogue → Pro plan → Price ID
+STRIPE_PRICE_ID_PRO=
+
+# ── MailChannels (outbound transactional email) ───────────────
+# platform.mailchannels.com → API keys
+# Alternatively use Postmark: POSTMARK_API_KEY=
+MAILCHANNELS_API_KEY=
+
+# ── Cloudflare API ───────────────────────────────────────────
+# dash.cloudflare.com → My Profile → API Tokens → Create Token
+# Recommended template: "Edit Cloudflare Workers"
+# Scope to account + banproof.me zone
+CF_API_TOKEN=
+
+# ── Cloudflare Account ID ────────────────────────────────────
+# dash.cloudflare.com → right sidebar on any zone overview page
+CF_ACCOUNT_ID=
+
+# ── GitHub Fine-grained PAT ──────────────────────────────────
+# github.com → Settings → Developer settings →
+# Personal access tokens → Fine-grained tokens
+# Permissions: Contents (read), Actions (read), Metadata (read)
+# Repository: marzton/banproof.me
+GH_PAT=
+
+# ── Admin email ──────────────────────────────────────────────
+# Set in wrangler.toml [vars]; override here for local dev only
+ADMIN_EMAIL=admin@banproof.me
+
+# ── Environment ──────────────────────────────────────────────
+ENVIRONMENT=development

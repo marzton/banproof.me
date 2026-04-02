@@ -1,0 +1,23 @@
+{
+  "name": "@goldshore/database",
+  "version": "0.1.0",
+  "description": "Gold Shore Platform — shared D1 schema, TypeScript types, and query helpers",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".":        "./src/index.ts",
+    "./types":  "./src/types.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "db:create":  "wrangler d1 create gs-platform-prod",
+    "db:migrate": "wrangler d1 execute gs-platform-prod --file=migrations/0001_core_pivot.sql",
+    "db:migrate:local": "wrangler d1 execute gs-platform-prod --local --file=migrations/0001_core_pivot.sql",
+    "types": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260401.1",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.0.0"
+  }
+}

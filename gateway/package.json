@@ -1,18 +1,24 @@
 {
   "name": "banproof-core",
   "version": "1.0.0",
-  "description": "Banproof Core Cloudflare Worker",
+  "description": "Banproof Core Gateway — Cloudflare Worker with D1, KV, Workflows, and AI",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev":    "wrangler dev",
     "deploy": "wrangler deploy",
-    "type-check": "tsc --noEmit"
+    "test":   "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "hono": "^4.6.14"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250401.0",
+    "@cloudflare/workers-types": "^4.20260401.1",
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^4.1.2",
     "typescript": "^5.7.2",
-    "wrangler": "^3.109.0"
+    "vitest": "^4.1.2",
+    "wrangler": "^4.0.0"
   }
 }

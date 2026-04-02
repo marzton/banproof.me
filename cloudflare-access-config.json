@@ -1,0 +1,182 @@
+{
+  "version": "1.0.0",
+  "description": "Cloudflare Access Zero-Edge policies for banproof-core",
+  "team_domain": "your-team.cloudflareaccess.com",
+  "applications": [
+    {
+      "name": "Banproof Public Site",
+      "description": "Marketing site — no authentication required",
+      "domain": "banproof.me",
+      "path": "/",
+      "session_duration": "none",
+      "allowed_idps": [],
+      "policies": [
+        {
+          "name": "Allow Everyone",
+          "decision": "allow",
+          "include": [
+            { "everyone": {} }
+          ]
+        }
+      ],
+      "custom_pages": {},
+      "tags": ["public"]
+    },
+    {
+      "name": "Banproof Health Check",
+      "description": "Health check endpoint — public, no auth (monitoring exempt)",
+      "domain": "banproof.me",
+      "path": "/api/health",
+      "session_duration": "none",
+      "allowed_idps": [],
+      "policies": [
+        {
+          "name": "Allow Everyone",
+          "decision": "allow",
+          "include": [
+            { "everyone": {} }
+          ]
+        }
+      ],
+      "tags": ["public", "monitoring"]
+    },
+    {
+      "name": "Banproof Pro API",
+      "description": "Pro-tier API endpoints — requires valid JWT + authenticated user",
+      "domain": "banproof.me",
+      "path": "/api/pro/*",
+      "aud": "https://your-app.workers.dev",
+      "session_duration": "24h",
+      "auto_redirect_to_identity": true,
+      "allowed_idps": ["discord", "google", "github"],
+      "allowed_email_domains": ["banproof.me"],
+      "custom_claims": [
+        {
+          "name": "user_id",
+          "source": "sub",
+          "required": true
+        },
+        {
+          "name": "role",
+          "source": "custom.role",
+          "required": true,
+          "default": "pro"
+        },
+        {
+          "name": "tier_level",
+          "source": "custom.tier_level",
+          "required": true,
+          "default": "pro"
+        }
+      ],
+      "policies": [
+        {
+          "name": "Require Pro or Agency Tier",
+          "decision": "allow",
+          "require": [
+            { "login_method": "otp" }
+          ],
+          "include": [
+            { "email_domain": "banproof.me" },
+            { "group": "pro-users" },
+            { "group": "agency-users" }
+          ]
+        }
+      ],
+      "ip_restrictions": {
+        "trust_cf_connecting_ip": true,
+        "block_disposable_email": true
+      },
+      "tags": ["pro-tier", "api"]
+    },
+    {
+      "name": "Banproof Admin / Toll Booth",
+      "description": "Admin dashboard and config — requires admin role + IP reputation check",
+      "domain": "banproof.me",
+      "path": "/admin/*",
+      "aud": "https://your-app.workers.dev",
+      "session_duration": "4h",
+      "auto_redirect_to_identity": true,
+      "allowed_idps": ["github"],
+      "allowed_email_domains": ["banproof.me"],
+      "custom_claims": [
+        {
+          "name": "user_id",
+          "source": "sub",
+          "required": true
+        },
+        {
+          "name": "role",
+          "source": "custom.role",
+          "required": true
+        },
+        {
+          "name": "tier_level",
+          "source": "custom.tier_level",
+          "required": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "Require Admin Role",
+          "decision": "allow",
+          "require": [
+            { "group": "admin-users" },
+            { "login_method": "otp" }
+          ],
+          "include": [
+            { "email": ["admin@banproof.me"] }
+          ]
+        },
+        {
+          "name": "Block Non-Admin IP Ranges",
+          "decision": "deny",
+          "include": [
+            { "ip": "0.0.0.0/0" }
+          ],
+          "exclude": [
+            { "ip": "100.100.100.0/24" },
+            { "ip": "100.200.200.0/24" },
+            { "ip": "127.0.0.1/32" }
+          ]
+        }
+      ],
+      "ip_restrictions": {
+        "trust_cf_connecting_ip": true,
+        "trusted_ips": [
+          "100.100.100.0/24",
+          "100.200.200.0/24",
+          "127.0.0.1/32"
+        ],
+        "block_threat_categories": [
+          "anonymizer",
+          "tor",
+          "malicious"
+        ]
+      },
+      "tags": ["admin", "restricted"]
+    }
+  ],
+  "service_tokens": [
+    {
+      "name": "banproof-agent-token",
+      "description": "Programmatic access for banproof automation agents",
+      "duration": "8760h",
+      "routes": ["/api/pro/*"]
+    }
+  ],
+  "groups": [
+    {
+      "name": "admin-users",
+      "include": [{ "email": "admin@banproof.me" }]
+    },
+    {
+      "name": "pro-users",
+      "include": [{ "email_domain": "banproof.me" }]
+    },
+    {
+      "name": "agency-users",
+      "include": [{ "email_domain": "banproof.me" }]
+    }
+  ]
+}
