@@ -24,8 +24,30 @@ USE_MOCK    = "true"
 [[routes]]
 pattern   = "banproof.me/api/*"
 zone_name = "banproof.me"
+
+[[routes]]
+pattern   = "banproof.me/admin/*"
+zone_name = "banproof.me"
+
 [observability]
 enabled = true
+
+# ── Cloudflare Access (Zero-Edge SSO) ─────────────────────────
+# CF_ZERO_EDGE_PUBLIC_KEY is a secret; set it with:
+# `wrangler secret put CF_ZERO_EDGE_PUBLIC_KEY --config gateway/wrangler.toml`
+[vars]
+CF_ACCESS_AUDIENCE = "https://banproof-core.marzton.workers.dev"
+
+# ── Production environment ────────────────────────────────────
+[env.production]
+[env.production.vars]
+CF_ACCESS_AUDIENCE = "https://banproof-core.marzton.workers.dev"
+
+# ── Development environment (mock SSO for local testing) ──────
+[env.development]
+[env.development.vars]
+CF_ACCESS_AUDIENCE   = "development"
+TRUSTED_ADMIN_IPS    = "127.0.0.1,::1,100.100.100.1,100.200.200.2"
 
 # ── D1 Database (binding: DB) ─────────────────────────────────
 [[d1_databases]]
@@ -50,4 +72,68 @@ class_name = "BanproofEngine"
 
 # ── Cloudflare AI (binding: AI) ───────────────────────────────
 [ai]
+binding = "AI"
+
+# ── Non-secret vars (production defaults) ────────────────────
+[vars]
+ENVIRONMENT = "production"
+USE_MOCK    = "true"
+# Flip USE_MOCK to "false" only after manual UI verification on mobile.
+# JWT_SECRET must be set via: wrangler secret put JWT_SECRET
+
+# ── Development environment ───────────────────────────────────
+# NOTE: Dev and staging share the production D1 database for now.
+# This is safe because USE_MOCK=true means no real API calls are made.
+# Create separate D1 instances when ready to test with real data.
+[env.development]
+vars = { ENVIRONMENT = "development", USE_MOCK = "true" }
+
+[[env.development.d1_databases]]
+binding       = "DB"
+database_name = "bp-core-prod"
+database_id   = "54e1a408-4b81-4ca5-b6a4-c2314dc0cf46"
+
+[[env.development.kv_namespaces]]
+binding = "CACHE"
+id      = "af8eb071fce34b5eafbdeb1badd93876"
+
+[[env.development.kv_namespaces]]
+binding = "INFRA_SECRETS"
+id      = "b9824d3280c54573a24137c7e7143b33"
+
+[[env.development.workflows]]
+binding    = "ENGINE"
+name       = "banproof-engine"
+class_name = "BanproofEngine"
+
+[env.development.ai]
+binding = "AI"
+
+# ── Staging environment ───────────────────────────────────────
+[env.staging]
+vars = { ENVIRONMENT = "staging", USE_MOCK = "true" }
+
+[[env.staging.routes]]
+pattern   = "staging-api.banproof.me/api/*"
+zone_name = "banproof.me"
+
+[[env.staging.d1_databases]]
+binding       = "DB"
+database_name = "bp-core-prod"
+database_id   = "54e1a408-4b81-4ca5-b6a4-c2314dc0cf46"
+
+[[env.staging.kv_namespaces]]
+binding = "CACHE"
+id      = "af8eb071fce34b5eafbdeb1badd93876"
+
+[[env.staging.kv_namespaces]]
+binding = "INFRA_SECRETS"
+id      = "b9824d3280c54573a24137c7e7143b33"
+
+[[env.staging.workflows]]
+binding    = "ENGINE"
+name       = "banproof-engine"
+class_name = "BanproofEngine"
+
+[env.staging.ai]
 binding = "AI"
