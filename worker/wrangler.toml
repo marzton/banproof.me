@@ -1,4 +1,9 @@
 # ================================================================
+# banproof-core — Gatekeeper Worker
+# ================================================================
+# Deploy:  cd worker && npm run deploy
+# Dev:     cd worker && npm run dev
+# ================================================================
 # banproof-core-legacy — DEPRECATED Gatekeeper Worker
 # ================================================================
 # This worker is superseded by gateway/ (banproof-core).
@@ -17,7 +22,12 @@ compatibility_flags = ["nodejs_compat"]
 enabled = true
 
 # ----------------------------------------------------------------
-# ROUTES — removed; gateway/ (banproof-core) owns banproof.me/api/*
+# ROUTES
+# Historically, this worker intercepted /api/* calls while other
+# paths fell through to the static site served by the root
+# wrangler.jsonc.
+# ROUTES — removed; gateway/ (banproof-core) now owns
+# banproof.me/api/*
 # ----------------------------------------------------------------
 
 # ----------------------------------------------------------------
