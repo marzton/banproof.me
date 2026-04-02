@@ -43,7 +43,7 @@ export const authMiddleware: MiddlewareHandler<{
 
   let payload: JwtPayload;
   try {
-    payload = (await verify(token, c.env.JWT_SECRET)) as JwtPayload;
+    payload = (await verify(token, c.env.JWT_SECRET, 'HS256')) as unknown as JwtPayload;
   } catch {
     return c.json({ error: 'Invalid or expired token.' }, 401);
   }

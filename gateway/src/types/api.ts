@@ -21,33 +21,32 @@ export interface JwtPayload {
   tier:  PlanTier;
   iat:   number;
   exp:   number;
+  [key: string]: unknown;  // required for hono/jwt sign/verify compatibility
 }
 
 // ── Engine / Workflow ─────────────────────────────────────────
 
-export type SentimentLabel = 'BULLISH' | 'BEARISH' | 'NEUTRAL';
-
 export interface SentimentResult {
-  label:      SentimentLabel;
   score:      number;  // 0.0 – 1.0
+  label:      'BULLISH' | 'BEARISH';
   confidence: number;  // 0.0 – 1.0
+  source:     'MOCK_HF' | 'REAL_HF';
 }
 
-export interface BookmakerOdds {
-  bookmaker: string;
-  price:     number;  // American odds (negative = favourite)
-  spread:    number;  // spread in points (0 = best value)
-}
-
-export interface BestPrice {
-  bookmaker: string;
-  price:     number;
-  value:     'EV+' | 'EV-' | 'NEUTRAL';
+export interface Bookmaker {
+  name:   string;
+  price:  number;   // American odds (negative = favourite)
+  spread: number;   // spread in points
+  value?: 'EV+' | 'EV-' | 'FAIR';
 }
 
 export interface OddsResult {
-  bookmakers: BookmakerOdds[];
-  bestPrice:  BestPrice;
+  bookmakers: Bookmaker[];
+  best_price: {
+    bookmaker: string;
+    price:     number;
+  };
+  source: 'MOCK_ODDS' | 'REAL_ODDS';
 }
 
 export interface AgencyAnalytics {
@@ -55,6 +54,14 @@ export interface AgencyAnalytics {
   ev_plus_threshold:  number;
   confidence_multiplier: number;
   recommendation:     'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL';
+}
+
+// ── Workflow ──────────────────────────────────────────────────
+
+export interface WorkflowPayload {
+  query:    string;
+  userId:   string;
+  useMock?: boolean;
 }
 
 // ── Audit ────────────────────────────────────────────────────
@@ -71,34 +78,6 @@ export interface AdminAuditEntry {
   target_user_id: string;
   metadata:       Record<string, unknown>;
   ip_address:     string;
-}
-// Banproof API — Shared TypeScript types
-// ============================================================
-
-export interface SentimentResult {
-  score: number;
-  label: 'BULLISH' | 'BEARISH';
-  confidence: number;
-  source: 'MOCK_HF' | 'REAL_HF';
-}
-
-export interface Bookmaker {
-  name: string;
-  price: number;
-  spread: number;
-  value?: 'EV+' | 'EV-' | 'FAIR';
-}
-
-export interface OddsResult {
-  bookmakers: Bookmaker[];
-  best_price: { bookmaker: string; price: number };
-  source: 'MOCK_ODDS' | 'REAL_ODDS';
-}
-
-export interface WorkflowPayload {
-  query: string;
-  userId: string;
-  useMock?: boolean;
 }
 
 export type AuditAction =

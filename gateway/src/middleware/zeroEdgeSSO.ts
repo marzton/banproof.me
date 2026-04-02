@@ -153,11 +153,11 @@ export async function validateZeroEdgeJWT(
   }
 
   // Extract identity from custom claims
-  const custom = payload.custom ?? payload['com.banproof'] ?? {};
-  const userId = custom.user_id ?? payload.sub ?? '';
+  const customClaims = payload.custom ?? {};
+  const userId = customClaims.user_id ?? payload.sub ?? '';
   const email = payload.email ?? '';
-  const role = (custom.role as UserRole | undefined) ?? 'public';
-  const tierLevel = (custom.tier_level as TierLevel | undefined) ?? 'free';
+  const role = (customClaims.role as UserRole | undefined) ?? 'public';
+  const tierLevel = (customClaims.tier_level as TierLevel | undefined) ?? 'free';
 
   return {
     userId,

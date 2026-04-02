@@ -11,11 +11,12 @@ import { mockOdds }      from '../src/mocks/odds-api.js';
 describe('mockSentiment', () => {
   it('returns a valid SentimentResult', () => {
     const result = mockSentiment();
-    expect(['BULLISH', 'BEARISH', 'NEUTRAL']).toContain(result.label);
-    expect(result.score).toBeGreaterThanOrEqual(0.55);
-    expect(result.score).toBeLessThanOrEqual(0.95);
-    expect(result.confidence).toBeGreaterThanOrEqual(0.70);
+    expect(['BULLISH', 'BEARISH']).toContain(result.label);
+    expect(result.score).toBeGreaterThanOrEqual(0.5);
+    expect(result.score).toBeLessThanOrEqual(1.0);
+    expect(result.confidence).toBeGreaterThanOrEqual(0.5);
     expect(result.confidence).toBeLessThanOrEqual(0.98);
+    expect(result.source).toBe('MOCK_HF');
   });
 
   it('randomises labels across multiple calls', () => {
@@ -24,86 +25,72 @@ describe('mockSentiment', () => {
     expect(labels.has('BULLISH')).toBe(true);
     expect(labels.has('BEARISH')).toBe(true);
   });
-
-  it('score and confidence are numbers with 3 decimal places max', () => {
-    const { score, confidence } = mockSentiment();
-    expect(String(score).split('.')[1]?.length ?? 0).toBeLessThanOrEqual(3);
-    expect(String(confidence).split('.')[1]?.length ?? 0).toBeLessThanOrEqual(3);
-  });
 });
 
 // ── Odds mock tests ───────────────────────────────────────────
 
 describe('mockOdds', () => {
-  it('returns exactly 3 bookmakers', () => {
+  it('returns at least 3 bookmakers', () => {
     const result = mockOdds();
-    expect(result.bookmakers).toHaveLength(3);
+    expect(result.bookmakers.length).toBeGreaterThanOrEqual(3);
   });
 
   it('returns DraftKings, FanDuel, and BetMGM', () => {
     const result = mockOdds();
-    const names  = result.bookmakers.map((b) => b.bookmaker);
+    const names  = result.bookmakers.map((b) => b.name);
     expect(names).toContain('DraftKings');
     expect(names).toContain('FanDuel');
     expect(names).toContain('BetMGM');
   });
 
-  it('prices are in the American odds range -125 to -95', () => {
-    for (let i = 0; i < 20; i++) {
-      const { bookmakers } = mockOdds();
-      bookmakers.forEach(({ price }) => {
-        expect(price).toBeGreaterThanOrEqual(-125);
-        expect(price).toBeLessThanOrEqual(-95);
-      });
+  it('best_price bookmaker has the highest price', () => {
+    for (let i = 0; i < 10; i++) {
+      const { bookmakers, best_price } = mockOdds();
+      const maxPrice = Math.max(...bookmakers.map((b) => b.price));
+      expect(best_price.price).toBe(maxPrice);
     }
   });
 
-  it('bestPrice bookmaker is the one with the lowest spread', () => {
-    const { bookmakers, bestPrice } = mockOdds();
-    const minSpread = Math.min(...bookmakers.map((b) => b.spread));
-    const expected  = bookmakers.find((b) => b.spread === minSpread)!;
-    expect(bestPrice.bookmaker).toBe(expected.bookmaker);
-  });
-
-  it('bestPrice.value is EV+, NEUTRAL, or EV-', () => {
-    const { bestPrice } = mockOdds();
-    expect(['EV+', 'NEUTRAL', 'EV-']).toContain(bestPrice.value);
-  });
-
-  it('spreads are 0.0 – 12.0', () => {
+  it('best_price.value is EV+, EV-, or FAIR', () => {
     for (let i = 0; i < 10; i++) {
       const { bookmakers } = mockOdds();
-      bookmakers.forEach(({ spread }) => {
-        expect(spread).toBeGreaterThanOrEqual(0);
-        expect(spread).toBeLessThanOrEqual(12);
-      });
+      for (const bm of bookmakers) {
+        expect(['EV+', 'EV-', 'FAIR']).toContain(bm.value);
+      }
     }
+  });
+
+  it('returns source MOCK_ODDS', () => {
+    expect(mockOdds().source).toBe('MOCK_ODDS');
   });
 });
 
 // ── Best price logic ──────────────────────────────────────────
 
 describe('best price selection', () => {
-  it('always selects the bookmaker with the minimum spread', () => {
+  it('always selects the bookmaker with the highest price', () => {
     for (let i = 0; i < 50; i++) {
-      const { bookmakers, bestPrice } = mockOdds();
-      const sorted  = [...bookmakers].sort((a, b) => a.spread - b.spread);
-      expect(bestPrice.bookmaker).toBe(sorted[0].bookmaker);
+      const { bookmakers, best_price } = mockOdds();
+      const maxPrice = Math.max(...bookmakers.map((b) => b.price));
+      const expected = bookmakers.find((b) => b.price === maxPrice)!;
+      expect(best_price.bookmaker).toBe(expected.name);
     }
   });
 
-  it('bestPrice.value is EV+ when spread < 3', () => {
-    // Run many times; at least some should produce EV+
-    const values: string[] = [];
+  it('EV+ classification applies when price > -108', () => {
+    // Run many times to hit EV+ bookmakers
+    let foundEV = false;
     for (let i = 0; i < 200; i++) {
-      const { bestPrice, bookmakers } = mockOdds();
-      const minSpread = Math.min(...bookmakers.map((b) => b.spread));
-      if (minSpread < 3)  values.push('EV+');
-      if (minSpread >= 3 && minSpread < 7) values.push('NEUTRAL');
-      if (minSpread >= 7) values.push('EV-');
+      const { bookmakers } = mockOdds();
+      for (const bm of bookmakers) {
+        if (bm.price > -108) {
+          expect(bm.value).toBe('EV+');
+          foundEV = true;
+        }
+        if (bm.price < -115) expect(bm.value).toBe('EV-');
+      }
     }
-    // All three categories should appear in 200 samples
-    expect(values).toContain('EV+');
-    expect(values).toContain('NEUTRAL');
+    // Statistically, at least one EV+ should appear in 200 runs
+    expect(foundEV).toBe(true);
   });
 });

@@ -92,7 +92,7 @@ async function createAccessToken(
     iat:   now,
     exp:   now + ACCESS_TOKEN_TTL,
   };
-  return sign(payload, secret);
+  return sign(payload as Record<string, unknown>, secret);
 }
 
 // ── POST /auth/signup ─────────────────────────────────────────

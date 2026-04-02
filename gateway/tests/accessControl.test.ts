@@ -40,7 +40,7 @@ const BASE_ENV = {
 };
 
 function buildApp() {
-  const app = new Hono();
+  const app = new Hono<{ Variables: { accessContext: AccessContext } }>();
 
   app.use('*', accessControlMiddleware);
 
@@ -56,7 +56,7 @@ function buildApp() {
 
 /** Fetch helper — passes the env object as the second argument (Cloudflare Worker style) */
 function doFetch(
-  app: Hono,
+  app: Hono<{ Variables: { accessContext: AccessContext } }>,
   request: Request,
   envOverrides: Record<string, string> = {},
 ) {
