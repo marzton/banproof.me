@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS audit_log (
     id         INTEGER  PRIMARY KEY AUTOINCREMENT,
     user_id    TEXT,
+    tier       TEXT,
     action     TEXT,
     metadata   TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP

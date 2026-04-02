@@ -1,0 +1,50 @@
+# ============================================================
+# Banproof Core (gateway/) — Local Development Secrets Template
+# Copy this file to .dev.vars (git-ignored) and fill in values
+# for local development with `wrangler dev`.
+#
+# For production secrets run:
+#   wrangler secret put <KEY_NAME> --config gateway/wrangler.toml
+#
+# Cloudflare Bindings (auto-provided by wrangler.toml — no entry needed here):
+#   DB             → D1 database  (bp-core-prod)       — see gateway/wrangler.toml [[d1_databases]]
+#   CACHE          → KV namespace                       — rate-limit windows
+#   INFRA_SECRETS  → KV namespace                       — runtime secret store
+#   ENGINE         → Workflow binding (banproof-engine / BanproofEngine)
+#   AI             → Cloudflare AI binding
+# ============================================================
+
+# ── Toggle Mock / Real APIs ───────────────────────────────────
+# "true"  → use randomised mock data (safe for development, no API credits consumed)
+# "false" → call real Hugging Face + Odds API (requires HF_API_TOKEN + ODDS_API_KEY below)
+# Production default is set in gateway/wrangler.toml [vars]; override here for local dev.
+USE_MOCK=true
+
+# ── Environment ───────────────────────────────────────────────
+# Override the wrangler.toml [vars] ENVIRONMENT value for local dev only.
+ENVIRONMENT=development
+
+# ── Hugging Face API Token ────────────────────────────────────
+# Used in engine.ts Step 1 (real sentiment analysis) when USE_MOCK=false.
+# 1. Sign up / log in:  https://huggingface.co/join
+# 2. Generate token:    https://huggingface.co/settings/tokens
+#    → New token → Type: "Read" → copy the hf_… value
+# Production: wrangler secret put HF_API_TOKEN --config gateway/wrangler.toml
+HF_API_TOKEN=
+
+# ── The Odds API Key ──────────────────────────────────────────
+# Used in engine.ts Step 2 (real market odds) when USE_MOCK=false.
+# 1. Sign up / log in:  https://the-odds-api.com/#get-access
+# 2. Get key:           https://api.the-odds-api.com/ (shown on dashboard after login)
+#    → Copy the 32-char alphanumeric key from "Your API Key" panel
+# Production: wrangler secret put ODDS_API_KEY --config gateway/wrangler.toml
+ODDS_API_KEY=
+
+# ── Discord Webhook (optional) ────────────────────────────────
+# If set, engine.ts Step 4 posts a signal summary to the Discord channel.
+# If unset the workflow logs to console instead — no error is thrown.
+# 1. Open your Discord server → Server Settings → Integrations → Webhooks
+# 2. Click "New Webhook" → choose channel → "Copy Webhook URL"
+#    URL format: https://discord.com/api/webhooks/{id}/{token}
+# Production: wrangler secret put DISCORD_WEBHOOK --config gateway/wrangler.toml
+DISCORD_WEBHOOK=

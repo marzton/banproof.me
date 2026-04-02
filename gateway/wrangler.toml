@@ -7,6 +7,20 @@ compatibility_flags = ["nodejs_compat"]
 ENVIRONMENT = "production"
 USE_MOCK    = "true"
 
+# ── Secrets (never put plaintext values here) ─────────────────
+# Upload each secret with:
+#   wrangler secret put HF_API_TOKEN    --config gateway/wrangler.toml
+#   wrangler secret put ODDS_API_KEY    --config gateway/wrangler.toml
+#   wrangler secret put DISCORD_WEBHOOK --config gateway/wrangler.toml
+#
+# For local dev: copy gateway/.dev.vars.example → gateway/.dev.vars
+# and fill in values (file is git-ignored via .gitignore).
+#
+# Key generation links:
+#   HF_API_TOKEN    → https://huggingface.co/settings/tokens
+#   ODDS_API_KEY    → https://the-odds-api.com/#get-access
+#   DISCORD_WEBHOOK → https://discord.com → Server Settings → Integrations → Webhooks
+
 [[routes]]
 pattern   = "banproof.me/api/*"
 zone_name = "banproof.me"

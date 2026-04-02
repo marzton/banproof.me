@@ -11,10 +11,21 @@ import { auditLogger }   from './middleware/auditLogger.js';
 
 // ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
+  // D1 database
   DB:               D1Database;
-  CACHE:            KVNamespace;
+  // KV namespaces
+  CACHE:            KVNamespace;   // rate-limit windows
+  INFRA_SECRETS:    KVNamespace;   // runtime secret store
+  // Cloudflare Workflow
   ENGINE:           Workflow;
+  // Cloudflare AI
+  AI:               Ai;
+  // [vars] — non-secret
+  ENVIRONMENT:      string;
   USE_MOCK:         string;
+  // Secrets (wrangler secret put)
+  HF_API_TOKEN?:    string;
+  ODDS_API_KEY?:    string;
   DISCORD_WEBHOOK?: string;
 };
 
