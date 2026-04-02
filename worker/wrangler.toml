@@ -1,11 +1,14 @@
 # ================================================================
-# banproof-core — Gatekeeper Worker
+# banproof-core-legacy — DEPRECATED Gatekeeper Worker
 # ================================================================
-# Deploy:  cd worker && npm run deploy
-# Dev:     cd worker && npm run dev
+# This worker is superseded by gateway/ (banproof-core).
+# It is kept as a reference for the session-cookie + Turnstile
+# auth pattern and the Stripe webhook handler.
+#
+# DO NOT DEPLOY. Use gateway/ for all new development.
 # ================================================================
 
-name             = "banproof-core"
+name             = "banproof-core-legacy"
 main             = "src/index.ts"
 compatibility_date  = "2025-09-27"
 compatibility_flags = ["nodejs_compat"]
@@ -14,13 +17,8 @@ compatibility_flags = ["nodejs_compat"]
 enabled = true
 
 # ----------------------------------------------------------------
-# ROUTES
-# The worker intercepts /api/* calls; all other paths fall through
-# to the static site served by the root wrangler.jsonc.
+# ROUTES — removed; gateway/ (banproof-core) owns banproof.me/api/*
 # ----------------------------------------------------------------
-[[routes]]
-pattern   = "banproof.me/api/*"
-zone_name = "banproof.me"
 
 # ----------------------------------------------------------------
 # D1 DATABASE  (binding name: DB)
@@ -33,8 +31,8 @@ zone_name = "banproof.me"
 # ----------------------------------------------------------------
 [[d1_databases]]
 binding       = "DB"
-database_name = "prod-core-db"
-database_id   = "REPLACE_WITH_D1_DATABASE_ID"
+database_name = "bp-core-prod"
+database_id   = "54e1a408-4b81-4ca5-b6a4-c2314dc0cf46"
 
 # ----------------------------------------------------------------
 # KV NAMESPACES

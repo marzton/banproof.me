@@ -43,7 +43,7 @@ export default {
       const auditReport = {
         timestamp: new Date().toISOString(),
         github: {
-          accountStatus: userResponse.ok ? `Authenticated as ${ghUser.login}` : 'Auth Failed',
+          accountStatus: userResponse.ok ? `Authenticated as ${(ghUser as { login?: string }).login ?? 'unknown'}` : 'Auth Failed',
           repoCount: Array.isArray(ghRepos) ? ghRepos.length : 0,
           settingsMismatches: "Scan initialized...", // Add specific configuration audits here
         },
