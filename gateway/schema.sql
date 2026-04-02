@@ -67,6 +67,8 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_admin_id ON admin_audit_log (admin_id
 CREATE TABLE IF NOT EXISTS audit_log (
     id         INTEGER  PRIMARY KEY AUTOINCREMENT,
     user_id    TEXT,
+    tier       TEXT,
+    action     TEXT,
     user_id    TEXT     NOT NULL REFERENCES users(id),
     action     TEXT     NOT NULL,
     metadata   TEXT,
