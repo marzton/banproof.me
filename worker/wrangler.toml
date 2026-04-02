@@ -23,10 +23,11 @@ enabled = true
 
 # ----------------------------------------------------------------
 # ROUTES
-# The worker intercepts /api/* calls; all other paths fall through
-# to the static site served by the root wrangler.jsonc.
-# ----------------------------------------------------------------
-# ROUTES — removed; gateway/ (banproof-core) owns banproof.me/api/*
+# Historically, this worker intercepted /api/* calls while other
+# paths fell through to the static site served by the root
+# wrangler.jsonc.
+# ROUTES — removed; gateway/ (banproof-core) now owns
+# banproof.me/api/*
 # ----------------------------------------------------------------
 
 # ----------------------------------------------------------------
