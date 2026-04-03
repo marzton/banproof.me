@@ -110,7 +110,7 @@ name = "MAILER"
 [vars]
 # Cloudflare Turnstile — public site key
 # Dashboard → Turnstile → Add Site (or select existing) → Site Key
-TURNSTILE_SITE_KEY = "REPLACE_WITH_TURNSTILE_SITE_KEY"
+TURNSTILE_SITE_KEY = "0x4AAAAAABpjjYpo5oUPFCrE"
 
 # Admin email address (used for Zero Trust Access policy)
 ADMIN_EMAIL = "admin@banproof.me"
