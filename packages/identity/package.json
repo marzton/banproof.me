@@ -1,0 +1,19 @@
+{
+  "name": "@goldshore/identity",
+  "version": "0.1.0",
+  "description": "Shared identity layer — types and auth middleware for the banproof.me monorepo",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "hono": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260401.1",
+    "hono": "^4.6.14",
+    "typescript": "^5.7.2"
+  }
+}

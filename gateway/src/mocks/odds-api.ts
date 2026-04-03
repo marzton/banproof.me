@@ -1,5 +1,5 @@
 // ============================================================
-// Mock The Odds API — 3+ bookmakers with realistic spreads
+// Mock The Odds API — 4 bookmakers with realistic spreads
 // ============================================================
 
 import type { OddsResult, Bookmaker } from '../types/api.js';

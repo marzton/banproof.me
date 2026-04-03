@@ -1,5 +1,14 @@
 # banproof-core — Gatekeeper Worker
 
+> **⚠️ DEPRECATED — do not deploy.**
+> This worker (`banproof-core-legacy`) has been superseded by **`gateway/`**
+> (`banproof-core`), which owns the `banproof.me/api/*` route and provides the
+> canonical Cloudflare Workflows + JWT-based API engine.
+>
+> This directory is preserved as a reference for the session-cookie + Turnstile
+> auth pattern and the Stripe webhook handler.  Shared types and auth middleware
+> have been extracted to [`packages/identity`](../packages/identity).
+
 Full-stack Cloudflare Worker that sits in front of every `banproof.me/api/*`
 request.  It handles bot protection (Turnstile), subscription gating (Stripe →
 D1), session caching (KV), AI inference, and outbound email.
@@ -16,7 +25,7 @@ Cloudflare Edge  ──(banproof.me/api/*)──▶  banproof-core worker
                                                     │
                               ┌─────────────────────┼──────────────────────┐
                               ▼                     ▼                      ▼
-                        Turnstile           D1: prod-core-db          KV: CACHE
+                        Turnstile           D1: bp-core-prod          KV: CACHE
                         (bot check)        (users, cms, audit)     (session cache)
                               │                     │
                               ▼                     ▼
@@ -67,7 +76,7 @@ Edit `wrangler.toml` and replace the placeholder strings:
 | Key | Where to find it |
 |---|---|
 | `TURNSTILE_SITE_KEY` | Cloudflare Dashboard → Turnstile → your site → **Site Key** |
-| `database_id` (D1) | Output of `wrangler d1 create prod-core-db` |
+| `database_id` (D1) | Output of `wrangler d1 create bp-core-prod` |
 | KV `id` (CACHE) | Output of `wrangler kv namespace create banproof-cache` |
 
 ### 5 — Upload secrets
