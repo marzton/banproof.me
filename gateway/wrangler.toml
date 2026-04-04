@@ -4,11 +4,10 @@ compatibility_date = "2024-03-30"
 workers_dev = true
 
 # ==========================================================
-# 🛑 LEAD ADMIN ACTION REQUIRED - KV BINDING
+# KV binding for Worker access to infrastructure secrets
 # ==========================================================
-# PAUSED: Please provide the exact KV Namespace ID where the 
-# GH_PAT secret is stored. Once confirmed, replace the 
-# placeholder 'id' below or execute the binding via the CF UI.
+# INFRA_SECRETS is bound to the Cloudflare KV namespace
+# identified by the configured ID below.
 # ==========================================================
 [[kv_namespaces]]
 binding = "INFRA_SECRETS"
