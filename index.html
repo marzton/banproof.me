@@ -1027,7 +1027,7 @@
           <li class="dim">Audit logs</li>
           <li class="dim">SLA guarantee</li>
         </ul>
-        <a href="#" class="btn-ghost" style="display:block; text-align:center;">Get started free</a>
+        <a href="mailto:hello@rmarston.com?subject=Banproof%20Developer%20signup" class="btn-ghost" style="display:block; text-align:center;">Get started free</a>
       </div>
 
       <div class="price-card featured">
@@ -1043,7 +1043,7 @@
           <li>Custom risk thresholds</li>
           <li class="dim">Dedicated node pool</li>
         </ul>
-        <a href="#" class="btn-primary" style="display:block; text-align:center;">Start Pro trial</a>
+        <a href="mailto:hello@rmarston.com?subject=Banproof%20Pro%20trial" class="btn-primary" style="display:block; text-align:center;">Start Pro trial</a>
       </div>
 
       <div class="price-card">
@@ -1094,17 +1094,22 @@
 </footer>
 
 <script>
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
+  const revealElements = document.querySelectorAll('.reveal');
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
 
+    revealElements.forEach(el => observer.observe(el));
+  } else {
+    revealElements.forEach(el => el.classList.add('visible'));
+  }
   // Animate terminal lines in sequence
   const lines = document.querySelectorAll('.terminal-body div');
   lines.forEach((line, i) => {

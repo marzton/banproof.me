@@ -1,14 +1,13 @@
 name = "banproof-audit"
 main = "src/audit.ts"
 compatibility_date = "2024-03-30"
-workers_dev = true
+workers_dev = false
 
 # ==========================================================
-# 🛑 LEAD ADMIN ACTION REQUIRED - KV BINDING
+# KV BINDING
 # ==========================================================
-# PAUSED: Please provide the exact KV Namespace ID where the 
-# GH_PAT secret is stored. Once confirmed, replace the 
-# placeholder 'id' below or execute the binding via the CF UI.
+# Configured: the INFRA_SECRETS KV namespace binding is set
+# below for accessing the GH_PAT secret.
 # ==========================================================
 [[kv_namespaces]]
 binding = "INFRA_SECRETS"

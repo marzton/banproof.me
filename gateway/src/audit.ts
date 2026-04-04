@@ -33,8 +33,8 @@ export default {
         fetch('https://api.github.com/user/repos?visibility=all&sort=updated', { headers: ghHeaders })
       ]);
 
-      const ghUser = await userResponse.json();
-      const ghRepos = await reposResponse.json();
+      const ghUser = await userResponse.json() as { login?: string };
+      const ghRepos = await reposResponse.json() as unknown[];
 
       // Placeholder for Cloudflare Audit metrics 
       // (Requires fetching against https://api.cloudflare.com/client/v4/zones using a CF_API_TOKEN)
