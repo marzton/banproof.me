@@ -114,7 +114,7 @@ export class BanproofEngine extends WorkflowEntrypoint<Env, Params> {
         name:   bm.title,
         price:  bm.markets[0]?.outcomes[0]?.price ?? 0,
         spread: 0,
-        value:  undefined,
+        value:  undefined as OddsResult['bookmakers'][0]['value'],
       }));
       const best = bookmakers.length
         ? bookmakers.reduce((a, b) => (b.price > a.price ? b : a))
@@ -133,7 +133,7 @@ export class BanproofEngine extends WorkflowEntrypoint<Env, Params> {
         query,
         userId,
         sentiment,
-        best_price:     odds.best_price,
+        best_price: odds.best_price,
         ev_opportunity: evOpportunity ?? null,
       };
 

@@ -6,12 +6,27 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { Workflow } from '@cloudflare/workers-types';
 import { BanproofEngine } from './engine.js';
+import { rateLimiter }   from './middleware/rateLimiter.js';
+import { auditLogger }   from './middleware/auditLogger.js';
 
 // ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
-  DB:     D1Database;
-  CACHE:  KVNamespace;
-  ENGINE: Workflow;
+  // D1 database
+  DB:               D1Database;
+  // KV namespaces
+  CACHE:            KVNamespace;   // rate-limit windows
+  INFRA_SECRETS:    KVNamespace;   // runtime secret store
+  // Cloudflare Workflow
+  ENGINE:           Workflow;
+  // Cloudflare AI
+  AI:               Ai;
+  // [vars] — non-secret
+  ENVIRONMENT:      string;
+  USE_MOCK:         string;
+  // Secrets (wrangler secret put)
+  HF_API_TOKEN?:    string;
+  ODDS_API_KEY?:    string;
+  DISCORD_WEBHOOK?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -22,7 +37,7 @@ app.use(
   cors({
     origin: ['https://banproof.me', 'http://localhost:5500'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-User-Id', 'X-User-Tier'],
     credentials: true,
   }),
 );
@@ -55,6 +70,23 @@ app.use('/api/pro/*', async (c, next) => {
 });
 // ── POST /api/pro/analyze ─────────────────────────────────────
 // Triggers a BanproofEngine workflow instance.
+app.post(
+  '/api/pro/analyze',
+  rateLimiter,
+  auditLogger,
+  async (c) => {
+    const { query, userId } = await c.req.json<{
+      query: string;
+      userId: string;
+    }>();
+
+    if (!query || !userId) {
+      return c.json({ error: 'query and userId are required.' }, 400);
+    }
+
+    const instance = await c.env.ENGINE.create({
+      params: { query, userId, useMock: c.env.USE_MOCK === 'true' },
+    });
 app.post('/api/pro/analyze', async (c) => {
   let body: unknown;
   try {
@@ -85,8 +117,9 @@ app.post('/api/pro/analyze', async (c) => {
     params: { query, userId },
   });
 
-  return c.json({ workflowId: instance.id }, 202);
-});
+    return c.json({ workflowId: instance.id }, 202);
+  },
+);
 
 // ── Exports ───────────────────────────────────────────────────
 export { BanproofEngine };
