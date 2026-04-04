@@ -1,6 +1,6 @@
 -- ============================================================
 -- banproof.me — D1 Database Schema
--- Apply: wrangler d1 execute prod-core-db --file=schema.sql
+-- Apply: wrangler d1 execute bp-core-prod --file=schema.sql
 -- ============================================================
 
 -- Users table: auth, subscription tier, Stripe link
