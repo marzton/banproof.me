@@ -6,6 +6,7 @@ import { Hono }        from 'hono';
 import { cors }        from 'hono/cors';
 import type { Workflow, MessageBatch, Ai } from '@cloudflare/workers-types';
 import { BanproofEngine } from './engine.js';
+import { SubscriptionPurchaseWorkflow, type SubscriptionPurchaseParams } from './workflows/subscriptionPurchase.js';
 import { rateLimiter }   from './middleware/rateLimiter.js';
 import { auditLogger }   from './middleware/auditLogger.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -16,6 +17,7 @@ import authRoutes      from './routes/auth.js';
 import adminRoutes     from './routes/admin.js';
 import type { AccessContext } from './types/access.js';
 import { SentimentWorkflow } from './workflows/sentimentWorkflow.js';
+import adminEmailRoutes from './routes/adminEmail.js';
 
 // ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
@@ -23,6 +25,7 @@ type Bindings = {
   CACHE:            KVNamespace;
   INFRA_SECRETS:    KVNamespace;
   ENGINE:           Workflow;
+  PURCHASE_WORKFLOW: Workflow;
   STORAGE:          R2Bucket;
   AI:               Ai;
   ENVIRONMENT:      string;
@@ -34,6 +37,8 @@ type Bindings = {
   DISCORD_WEBHOOK?: string;
   /** Service binding → saas-admin-template-customer-workflow */
   WORKFLOW:         Fetcher;
+  /** Service binding → banproof-email-router */
+  EMAIL_ROUTER:     Fetcher;
   /** Queue producer → goldshore-jobs */
   QUEUE:            Queue<QueueJobMessage>;
 };
@@ -88,7 +93,6 @@ app.get('/api/health', async (c) => {
     mock:     c.env.USE_MOCK !== 'false',
     ts:       new Date().toISOString(),
   });
-  return c.json({ success: true, workflowId: instance.id });
 });
 
 // ── Auth routes (/auth/*) ─────────────────────────────────────
@@ -96,6 +100,50 @@ app.route('/auth', authRoutes);
 
 // ── Admin routes (/admin/*) ───────────────────────────────────
 app.route('/admin', adminRoutes);
+app.route('/api/admin', adminEmailRoutes);
+
+
+// ── POST /api/paywall/purchase/complete ─────────────────────
+app.post('/api/paywall/purchase/complete', async (c) => {
+  const body = await c.req
+    .json<SubscriptionPurchaseParams>()
+    .catch(() => null);
+
+  if (!body) {
+    return c.json({ error: 'Invalid JSON payload.' }, 400);
+  }
+
+  if (!body.userId || typeof body.userId !== 'string') {
+    return c.json({ error: 'userId (string) is required.' }, 400);
+  }
+
+  if (!['free', 'pro', 'agency'].includes(body.targetTier)) {
+    return c.json({ error: 'targetTier must be one of: free, pro, agency.' }, 400);
+  }
+
+  if (!body.paymentEvent || typeof body.paymentEvent !== 'object') {
+    return c.json({ error: 'paymentEvent metadata is required.' }, 400);
+  }
+
+  if (typeof body.paymentEvent.eventId !== 'string' || !body.paymentEvent.eventId) {
+    return c.json({ error: 'paymentEvent.eventId (string) is required.' }, 400);
+  }
+
+  if (typeof body.paymentEvent.provider !== 'string' || !body.paymentEvent.provider) {
+    return c.json({ error: 'paymentEvent.provider (string) is required.' }, 400);
+  }
+
+  const instance = await c.env.PURCHASE_WORKFLOW.create({
+    params: {
+      userId: body.userId,
+      targetTier: body.targetTier,
+      paymentEvent: body.paymentEvent,
+      notify: body.notify,
+    },
+  });
+
+  return c.json({ ok: true, workflowId: instance.id }, 202);
+});
 
 // ── POST /api/pro/analyze ─────────────────────────────────────
 // Triggers a BanproofEngine workflow instance.
@@ -183,7 +231,7 @@ app.onError((err, c) => {
 });
 
 // ── Exports ───────────────────────────────────────────────────
-export { BanproofEngine };
+export { BanproofEngine, SubscriptionPurchaseWorkflow };
 
 export default {
   fetch: app.fetch.bind(app),

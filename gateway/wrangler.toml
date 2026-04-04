@@ -86,6 +86,11 @@ binding    = "ENGINE"
 name       = "banproof-engine"
 class_name = "BanproofEngine"
 
+[[workflows]]
+binding    = "PURCHASE_WORKFLOW"
+name       = "subscription-purchase"
+class_name = "SubscriptionPurchaseWorkflow"
+
 # ── Cloudflare AI (binding: AI) ───────────────────────────────
 [ai]
 binding = "AI"
@@ -97,6 +102,10 @@ binding = "AI"
 [[services]]
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
+
+[[services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
 
 # ── Queue Producer (binding: QUEUE) ───────────────────────────
 # Enqueue background jobs for the goldshore-jobs consumer pipeline.
@@ -150,12 +159,21 @@ binding    = "ENGINE"
 name       = "banproof-engine"
 class_name = "BanproofEngine"
 
+[[env.development.workflows]]
+binding    = "PURCHASE_WORKFLOW"
+name       = "subscription-purchase-dev"
+class_name = "SubscriptionPurchaseWorkflow"
+
 [env.development.ai]
 binding = "AI"
 
 [[env.development.services]]
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
+
+[[env.development.services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
 
 [[env.development.queues.producers]]
 binding = "QUEUE"
@@ -196,12 +214,21 @@ binding    = "ENGINE"
 name       = "banproof-engine"
 class_name = "BanproofEngine"
 
+[[env.staging.workflows]]
+binding    = "PURCHASE_WORKFLOW"
+name       = "subscription-purchase-staging"
+class_name = "SubscriptionPurchaseWorkflow"
+
 [env.staging.ai]
 binding = "AI"
 
 [[env.staging.services]]
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
+
+[[env.staging.services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
 
 [[env.staging.queues.producers]]
 binding = "QUEUE"

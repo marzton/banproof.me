@@ -81,6 +81,23 @@ cd gateway && wrangler deploy
 
 ---
 
+## 6. Admin Email Route Requirements (`POST /api/admin/test-banproof-email`)
+
+- [ ] Service binding configured in `gateway/wrangler.toml`: `EMAIL_ROUTER -> banproof-email-router` for production, development, and staging.
+- [ ] `JWT_SECRET` exists so admin authentication succeeds.
+- [ ] Admin account token is available (role must be `admin` or `sudo`).
+
+Sample request:
+
+```sh
+curl -X POST 'https://banproof.me/api/admin/test-banproof-email' \
+  -H 'Authorization: Bearer <ADMIN_ACCESS_TOKEN>' \
+  -H 'Content-Type: application/json' \
+  --data '{"email":"ops@banproof.me"}'
+```
+
+---
+
 ## Rollback Procedure
 
 If issues arise after flipping `USE_MOCK=false`:

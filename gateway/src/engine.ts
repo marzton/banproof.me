@@ -163,6 +163,11 @@ export class BanproofEngine extends WorkflowEntrypoint<Env, Params> {
         best_price: odds.best_price,
         ev_opportunity: evOpportunity ?? null,
       };
+
+      await auditLog(this.env.DB, userId, 'AI_ANALYSIS', { ...decision, tier: userTier });
+      return decision;
+    });
+
     // ── Pro tier ────────────────────────────────────────────
     if (userTier === 'pro') {
       await step.do('persist-signal-pro', async () => {
