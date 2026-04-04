@@ -13,8 +13,12 @@ app.get('/public/milestones', (c: any) => {
 app.use('/api/*', tollBoothMiddleware);
 
 app.post('/api/verify', async (c: any) => {
-  const body = await c.req.json();
-  return c.json({ message: 'Payload verified and logged', data: body });
+  try {
+    const body = await c.req.json();
+    return c.json({ message: 'Payload verified and logged', data: body });
+  } catch {
+    return c.json({ message: 'Invalid JSON body' }, 400);
+  }
 });
 
 app.get('/api/data/goldshore', (c: any) => {
