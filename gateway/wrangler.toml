@@ -29,6 +29,14 @@ zone_name = "banproof.me"
 pattern   = "banproof.me/admin/*"
 zone_name = "banproof.me"
 
+[[routes]]
+pattern   = "rmarston.com/api/*"
+zone_name = "rmarston.com"
+
+[[routes]]
+pattern   = "rmarston.com/admin/*"
+zone_name = "rmarston.com"
+
 [observability]
 enabled = true
 

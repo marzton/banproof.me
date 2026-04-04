@@ -43,7 +43,7 @@ describe('mockOdds', () => {
 
   it('returns DraftKings, FanDuel, and BetMGM', () => {
     const result = mockOdds();
-    const names  = result.bookmakers.map((b) => b.bookmaker);
+    const names  = result.bookmakers.map((b) => b.name);
     expect(names).toContain('DraftKings');
     expect(names).toContain('FanDuel');
     expect(names).toContain('BetMGM');
@@ -59,27 +59,6 @@ describe('mockOdds', () => {
     }
   });
 
-  it('bestPrice bookmaker is the one with the lowest spread', () => {
-    const { bookmakers, bestPrice } = mockOdds();
-    const minSpread = Math.min(...bookmakers.map((b) => b.spread));
-    const expected  = bookmakers.find((b) => b.spread === minSpread)!;
-    expect(bestPrice.bookmaker).toBe(expected.bookmaker);
-  });
-
-  it('bestPrice.value is EV+, NEUTRAL, or EV-', () => {
-    const { bestPrice } = mockOdds();
-    expect(['EV+', 'NEUTRAL', 'EV-']).toContain(bestPrice.value);
-  });
-
-  it('spreads are 0.0 – 12.0', () => {
-    for (let i = 0; i < 10; i++) {
-      const { bookmakers } = mockOdds();
-      bookmakers.forEach(({ spread }) => {
-        expect(spread).toBeGreaterThanOrEqual(0);
-        expect(spread).toBeLessThanOrEqual(12);
-      });
-    }
-  });
   it('best_price bookmaker has the highest price', () => {
     for (let i = 0; i < 10; i++) {
       const { bookmakers, best_price } = mockOdds();
@@ -105,27 +84,6 @@ describe('mockOdds', () => {
 // ── Best price logic ──────────────────────────────────────────
 
 describe('best price selection', () => {
-  it('always selects the bookmaker with the minimum spread', () => {
-    for (let i = 0; i < 50; i++) {
-      const { bookmakers, bestPrice } = mockOdds();
-      const sorted  = [...bookmakers].sort((a, b) => a.spread - b.spread);
-      expect(bestPrice.bookmaker).toBe(sorted[0].bookmaker);
-    }
-  });
-
-  it('bestPrice.value is EV+ when spread < 3', () => {
-    // Run many times; at least some should produce EV+
-    const values: string[] = [];
-    for (let i = 0; i < 200; i++) {
-      const { bestPrice, bookmakers } = mockOdds();
-      const minSpread = Math.min(...bookmakers.map((b) => b.spread));
-      if (minSpread < 3)  values.push('EV+');
-      if (minSpread >= 3 && minSpread < 7) values.push('NEUTRAL');
-      if (minSpread >= 7) values.push('EV-');
-    }
-    // All three categories should appear in 200 samples
-    expect(values).toContain('EV+');
-    expect(values).toContain('NEUTRAL');
   it('always selects the bookmaker with the highest price', () => {
     for (let i = 0; i < 50; i++) {
       const { bookmakers, best_price } = mockOdds();

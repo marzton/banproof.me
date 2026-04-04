@@ -1,8 +1,12 @@
-name = "banproof-me"
+name = "rmarston-com"
 compatibility_date = "2025-09-27"
 
 [observability]
 enabled = true
 
 [assets]
-directory = "./"
+directory = "./public"
+
+[[routes]]
+pattern = "rmarston.com/*"
+zone_name = "rmarston.com"
