@@ -98,6 +98,10 @@ binding = "AI"
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
 
+[[services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
+
 # ── Queue Producer (binding: QUEUE) ───────────────────────────
 # Enqueue background jobs for the goldshore-jobs consumer pipeline.
 # Create the queue first:
@@ -157,6 +161,10 @@ binding = "AI"
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
 
+[[env.development.services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
+
 [[env.development.queues.producers]]
 binding = "QUEUE"
 queue   = "goldshore-jobs"
@@ -202,6 +210,10 @@ binding = "AI"
 [[env.staging.services]]
 binding = "WORKFLOW"
 service = "saas-admin-template-customer-workflow"
+
+[[env.staging.services]]
+binding = "EMAIL_ROUTER"
+service = "banproof-email-router"
 
 [[env.staging.queues.producers]]
 binding = "QUEUE"

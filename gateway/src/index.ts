@@ -12,6 +12,7 @@ import { authMiddleware } from './middleware/auth.js';
 import { tollBoothMiddleware } from './middleware/tollBooth.js';
 import authRoutes      from './routes/auth.js';
 import adminRoutes     from './routes/admin.js';
+import adminEmailRoutes from './routes/adminEmail.js';
 
 // ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
@@ -30,6 +31,8 @@ type Bindings = {
   DISCORD_WEBHOOK?: string;
   /** Service binding → saas-admin-template-customer-workflow */
   WORKFLOW:         Fetcher;
+  /** Service binding → banproof-email-router */
+  EMAIL_ROUTER:     Fetcher;
   /** Queue producer → goldshore-jobs */
   QUEUE:            Queue<QueueJobMessage>;
 };
@@ -91,6 +94,7 @@ app.route('/auth', authRoutes);
 
 // ── Admin routes (/admin/*) ───────────────────────────────────
 app.route('/admin', adminRoutes);
+app.route('/api/admin', adminEmailRoutes);
 
 // ── POST /api/pro/analyze ─────────────────────────────────────
 // Triggers a BanproofEngine workflow instance.
