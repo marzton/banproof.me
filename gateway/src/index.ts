@@ -178,6 +178,7 @@ app.get('/api/health', async (c) => {
     mock:     c.env.USE_MOCK !== 'false',
     ts:       new Date().toISOString(),
   });
+  return c.json({ success: true, workflowId: instance.id });
 });
 
 // ── Auth routes (/auth/*) ─────────────────────────────────────
