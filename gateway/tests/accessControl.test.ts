@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { accessControlMiddleware } from '../src/middleware/accessControl.js';
+import { enforceRBAC } from '../src/middleware/zeroEdgeSSO.js';
 import type { ZeroEdgeIdentity, AccessContext } from '../src/types/access.js';
 
 // ── Mock zeroEdgeSSO module ───────────────────────────────────
@@ -46,6 +47,21 @@ function buildApp() {
 
   // Protected routes
   app.post('/api/pro/analyze', (c) => c.json({ ok: true }));
+  app.post('/api/access/sentiment', (c) => {
+    const accessContext = c.get('accessContext') as AccessContext | undefined;
+    if (!accessContext || !enforceRBAC(accessContext, 'pro')) {
+      const status = !accessContext || accessContext.method === 'public' ? 401 : 403;
+      return c.json({ error: "Access denied: 'pro' role required" }, status);
+    }
+    return c.json({
+      workflowId: 'sentiment-test-workflow',
+      source: 'mock',
+      access: {
+        tierUsed: accessContext.identity.tierLevel,
+        minTierRequired: 'pro',
+      },
+    }, 202);
+  });
   app.get('/admin/dashboard',  (c) => c.json({ ok: true }));
   app.post('/admin/config',    (c) => c.json({ ok: true }));
   // Public route
@@ -170,6 +186,52 @@ describe('accessControlMiddleware', () => {
     const app = buildApp();
     const res = await doFetch(app, jwtRequest('/api/pro/analyze', 'POST'));
     expect(res.status).toBe(200);
+  });
+
+  it('allows POST /api/access/sentiment with valid JWT + pro tier', async () => {
+    vi.mocked(validateZeroEdgeJWT).mockResolvedValue(makeIdentity({ role: 'pro', tierLevel: 'pro' }));
+
+    const app = buildApp();
+    const res = await doFetch(
+      app,
+      jwtRequest('/api/access/sentiment', 'POST', TRUSTED_IP, { 'Content-Type': 'application/json' }),
+    );
+    expect(res.status).toBe(202);
+    const body = await res.json() as {
+      workflowId: string;
+      source: string;
+      access: { tierUsed: string; minTierRequired: string };
+    };
+    expect(body.workflowId).toBeTruthy();
+    expect(body.source).toBe('mock');
+    expect(body.access.tierUsed).toBe('pro');
+    expect(body.access.minTierRequired).toBe('pro');
+  });
+
+  it('allows POST /api/access/sentiment with valid JWT + agency tier', async () => {
+    vi.mocked(validateZeroEdgeJWT).mockResolvedValue(makeIdentity({ role: 'agency', tierLevel: 'agency' }));
+
+    const app = buildApp();
+    const res = await doFetch(app, jwtRequest('/api/access/sentiment', 'POST'));
+    expect(res.status).toBe(202);
+  });
+
+  it('rejects POST /api/access/sentiment for free-tier JWT (403)', async () => {
+    vi.mocked(validateZeroEdgeJWT).mockResolvedValue(makeIdentity({ role: 'public', tierLevel: 'free' }));
+
+    const app = buildApp();
+    const res = await doFetch(app, jwtRequest('/api/access/sentiment', 'POST'));
+    expect(res.status).toBe(403);
+    const body = await res.json() as { error: string };
+    expect(body).toEqual({ error: "Access denied: 'pro' role required" });
+  });
+
+  it('rejects unauthenticated POST /api/access/sentiment (401)', async () => {
+    const app = buildApp();
+    const res = await doFetch(app, publicRequest('/api/access/sentiment', 'POST'));
+    expect(res.status).toBe(401);
+    const body = await res.json() as { error: string };
+    expect(body).toEqual({ error: "Access denied: 'pro' role required" });
   });
 
   it('denies POST /api/pro/analyze with valid JWT + free tier (403)', async () => {

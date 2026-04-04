@@ -10,8 +10,12 @@ import { rateLimiter }   from './middleware/rateLimiter.js';
 import { auditLogger }   from './middleware/auditLogger.js';
 import { authMiddleware } from './middleware/auth.js';
 import { tollBoothMiddleware } from './middleware/tollBooth.js';
+import { accessControlMiddleware } from './middleware/accessControl.js';
+import { enforceRBAC } from './middleware/zeroEdgeSSO.js';
 import authRoutes      from './routes/auth.js';
 import adminRoutes     from './routes/admin.js';
+import type { AccessContext } from './types/access.js';
+import { SentimentWorkflow } from './workflows/sentimentWorkflow.js';
 
 // ── Bindings type ─────────────────────────────────────────────
 type Bindings = {
@@ -37,6 +41,7 @@ type Bindings = {
 type Variables = {
   auth: import('./types/api.js').AuthContext;
   poaScore?: number;
+  accessContext?: AccessContext;
 };
 
 // ── Queue message schema ──────────────────────────────────────
@@ -127,6 +132,46 @@ app.post(
       workflowId: instance.id,
       poaScore: c.get('poaScore')
     }, 202);
+  },
+);
+
+// ── POST /api/access/sentiment ──────────────────────────────
+// Access-Controlled sentiment-only endpoint.
+app.post(
+  '/api/access/sentiment',
+  accessControlMiddleware,
+  async (c) => {
+    const body = await c.req.json<{ query: string }>().catch(() => null);
+    if (!body || typeof body.query !== 'string' || !body.query.trim()) {
+      return c.json({ error: 'query (string) is required.' }, 400);
+    }
+
+    const accessContext = c.get('accessContext');
+    if (!accessContext || !enforceRBAC(accessContext, 'pro')) {
+      const status = !accessContext || accessContext.method === 'public' ? 401 : 403;
+      return c.json(
+        { error: "Access denied: 'pro' role required" },
+        status,
+      );
+    }
+
+    const workflow = new SentimentWorkflow(c.env);
+    const execution = await workflow.execute(body.query.trim());
+    const workflowId = `sentiment-${crypto.randomUUID()}`;
+
+    return c.json(
+      {
+        workflowId,
+        sentiment: execution.sentiment,
+        source: execution.sourceMode,
+        access: {
+          tierUsed: accessContext.identity.tierLevel,
+          authMethod: accessContext.method,
+          minTierRequired: 'pro',
+        },
+      },
+      202,
+    );
   },
 );
 
